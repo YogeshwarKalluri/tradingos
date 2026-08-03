@@ -1,0 +1,56 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.*.local
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Data files
+data/
+*.duckdb
+*.db
+*.sqlite
+
+# Model files (large)
+models/**/*.gguf
+models/**/*.bin
+models/**/*.safetensors
+models/**/*.engine
+models/**/*.onnx
+
+# Cache
+cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,0 +1,166 @@
+# TradingOS Configuration
+# All settings loaded via Pydantic Settings from this file + environment variables
+
+app:
+  name: "TradingOS"
+  environment: "development"  # development, paper, live
+  timezone: "America/New_York"
+  log_level: "INFO"
+
+market_hours:
+  pre_market: "04:00"
+  regular_open: "09:30"
+  regular_close: "16:00"
+  post_market: "20:00"
+  learning_window: "16:00-08:00"
+
+scanner:
+  enabled: true
+  max_symbols: 500
+  scan_interval_ms: 1000
+  filters:
+    - name: "volume_spike"
+      min_relative_volume: 2.0
+    - name: "price_momentum"
+      min_change_pct: 1.5
+    - name: "float_filter"
+      max_float_m: 50
+
+market_data:
+  primary: "polygon"
+  fallback: "alpaca"
+  websocket:
+    reconnect_interval: 5
+    max_messages_per_second: 10000
+  cache:
+    max_ticks_per_symbol: 100000
+    max_bars_per_symbol: 10000
+
+chart_builder:
+  renderer: "cuda"  # cuda, opengl, cpu
+  default_timeframes: ["1m", "5m", "15m", "1h", "1d"]
+  chart_resolution: [512, 512]
+  gpu_memory_pool_mb: 512
+
+technical_indicators:
+  engine: "numba_cuda"
+  default_indicators:
+    - vwap
+    - ema_9
+    - ema_20
+    - rsi_14
+    - macd
+    - bollinger_bands
+    - atr_14
+  cache_size_mb: 1024
+
+vision_engine:
+  model: "yolo_v8_custom"
+  confidence_threshold: 0.7
+  patterns:
+    - bull_flag
+    - bear_flag
+    - cup_handle
+    - double_bottom
+    - vwap_reclaim
+    - opening_range_breakout
+  batch_size: 8
+  inference_timeout_ms: 50
+
+memory_engine:
+  vector_store: "qdrant"
+  embedding_model: "bge-large-en-v1.5"
+  top_k: 20
+  similarity_threshold: 0.75
+  rerank: true
+
+reasoning_engine:
+  model: "nemotron-3-ultra"
+  max_context_tokens: 8192
+  temperature: 0.1
+  evidence_weights:
+    pattern: 0.3
+    indicators: 0.2
+    historical: 0.3
+    volume: 0.2
+
+risk_engine:
+  max_position_pct: 0.05
+  max_portfolio_risk: 0.02
+  max_daily_loss: 0.01
+  max_sector_exposure: 0.20
+  kelly_fraction: 0.25
+  stop_loss_atr_multiple: 2.0
+
+execution_engine:
+  mode: "paper"  # paper, live
+  paper:
+    starting_capital: 100000
+    commission_per_share: 0.005
+    min_commission: 1.0
+    slippage_bps: 5
+  live:
+    broker: "alpaca"
+    api_key_env: "ALPACA_API_KEY"
+    secret_env: "ALPACA_SECRET"
+
+journal:
+  storage: "duckdb"
+  auto_export: true
+  export_format: "parquet"
+
+learning:
+  enabled: true
+  video_sources: []
+  model_evaluation:
+    metrics: ["sharpe", "sortino", "max_drawdown", "win_rate"]
+  report_schedule: "daily"
+
+dashboard:
+  enabled: true
+  host: "127.0.0.1"
+  port: 8080
+  update_interval_ms: 100
+  theme: "dark"
+
+logging:
+  level: "INFO"
+  format: "json"
+  file: "logs/tradingos.log"
+  max_size_mb: 100
+  backup_count: 10
+
+model_manager:
+  device: "cuda"
+  gpu_memory_fraction: 0.85
+  models:
+    vision:
+      name: "yolo_v8_custom"
+      path: "models/vision/yolo_v8_custom.engine"
+      backend: "tensorrt"
+    reasoning:
+      name: "nemotron-3-ultra"
+      path: "models/reasoning/nemotron-3-ultra.Q4_K_M.gguf"
+      backend: "llama_cpp"
+      context_size: 8192
+      gpu_layers: -1
+    embedding:
+      name: "bge-large-en-v1.5"
+      path: "models/embedding/bge-large-en-v1.5"
+      backend: "onnx"
+    speech:
+      name: "whisper-large-v3"
+      path: "models/speech/whisper-large-v3"
+      backend: "faster_whisper"
+
+databases:
+  duckdb:
+    path: "data/tradingos.duckdb"
+    memory_limit: "4GB"
+    threads: 8
+  sqlite:
+    path: "data/tradingos.db"
+  qdrant:
+    path: "data/qdrant"
+    port: 6333
+    prefer_grpc: false
