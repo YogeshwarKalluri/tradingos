@@ -202,7 +202,7 @@ class Config:
         self.env = env
         self._load_configs()
 
-    def _load_configs(self):
+    def _load_configs(self) -> None:
         """Load configuration from YAML files."""
         # Config files are at project root /config, not inside code/
         base_path = Path(__file__).parent.parent.parent.parent / "config"
@@ -213,7 +213,7 @@ class Config:
 
         # Load environment-specific config
         env_file = base_path / f"{self.env}.yaml"
-        env_config = {}
+        env_config: dict[str, Any] = {}
         if env_file.exists():
             with open(env_file) as f:
                 env_config = yaml.safe_load(f) or {}
@@ -264,7 +264,7 @@ def get_config(env: str | None = None) -> Config:
     return _config
 
 
-def reset_config():
+def reset_config() -> None:
     """Reset global configuration (for testing)."""
     global _config
     _config = None

@@ -19,7 +19,7 @@ class StockCandidate:
     priority_score: float = 0.0
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.priority_score == 0.0:
             self.priority_score = self._calculate_priority()
 

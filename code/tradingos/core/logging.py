@@ -144,7 +144,7 @@ def setup_logging(config: LoggingConfig | None = None) -> None:
 
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
     """Get a structured logger instance."""
-    return structlog.get_logger(name)
+    return structlog.get_logger(name)  # type: ignore[no-any-return]
 
 
 class TraceContext:
@@ -152,82 +152,107 @@ class TraceContext:
 
     def __init__(self, trace_id: str | None = None):
         self.trace_id = trace_id or str(uuid.uuid4())[:8]
-        self.previous = None
+        self.previous: str | None = None
 
     def __enter__(self) -> str:
         self.previous = trace_id_var.get()
         trace_id_var.set(self.trace_id)
         return self.trace_id
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
         if self.previous is not None:
             trace_id_var.set(self.previous)
         else:
             clear_trace_id()
 
 
-def log_with_context(logger: structlog.stdlib.BoundLogger,
-                     level: str,
-                     message: str,
-                     **kwargs) -> None:
+def log_with_context(
+    logger: structlog.stdlib.BoundLogger,
+    level: str,
+    message: str,
+    **kwargs: Any,
+) -> None:
     """Log with automatic trace ID and context."""
     getattr(logger, level)(message, **kwargs)
 
 
 # Convenience functions for common log patterns
-def log_event_received(logger: structlog.stdlib.BoundLogger,
-                       event_type: str,
-                       trace_id: str,
-                       **extra) -> None:
+def log_event_received(
+    logger: structlog.stdlib.BoundLogger,
+    event_type: str,
+    trace_id: str,
+    **extra: Any,
+) -> None:
     """Log event received."""
     logger.info("event_received", event_type=event_type, trace_id=trace_id, **extra)
 
 
-def log_event_published(logger: structlog.stdlib.BoundLogger,
-                        event_type: str,
-                        trace_id: str,
-                        **extra) -> None:
+def log_event_published(
+    logger: structlog.stdlib.BoundLogger,
+    event_type: str,
+    trace_id: str,
+    **extra: Any,
+) -> None:
     """Log event published."""
     logger.info("event_published", event_type=event_type, trace_id=trace_id, **extra)
 
 
-def log_stage_start(logger: structlog.stdlib.BoundLogger,
-                    stage: str,
-                    trace_id: str,
-                    **extra) -> None:
+def log_stage_start(
+    logger: structlog.stdlib.BoundLogger,
+    stage: str,
+    trace_id: str,
+    **extra: Any,
+) -> None:
     """Log pipeline stage start."""
     logger.info("stage_start", stage=stage, trace_id=trace_id, **extra)
 
 
-def log_stage_complete(logger: structlog.stdlib.BoundLogger,
-                       stage: str,
-                       trace_id: str,
-                       duration_ms: float,
-                       **extra) -> None:
+def log_stage_complete(
+    logger: structlog.stdlib.BoundLogger,
+    stage: str,
+    trace_id: str,
+    duration_ms: float,
+    **extra: Any,
+) -> None:
     """Log pipeline stage completion."""
     logger.info("stage_complete", stage=stage, trace_id=trace_id, duration_ms=duration_ms, **extra)
 
 
-def log_stage_error(logger: structlog.stdlib.BoundLogger,
-                    stage: str,
-                    trace_id: str,
-                    error: Exception,
-                    **extra) -> None:
+def log_stage_error(
+    logger: structlog.stdlib.BoundLogger,
+    stage: str,
+    trace_id: str,
+    error: Exception,
+    **extra: Any,
+) -> None:
     """Log pipeline stage error."""
-    logger.error("stage_error", stage=stage, trace_id=trace_id,
-                 error_type=type(error).__name__, error_message=str(error), **extra)
+    logger.error(
+        "stage_error",
+        stage=stage,
+        trace_id=trace_id,
+        error_type=type(error).__name__,
+        error_message=str(error),
+        **extra,
+    )
 
 
-def log_metric(logger: structlog.stdlib.BoundLogger,
-               name: str,
-               value: float,
-               trace_id: str | None = None,
-               **tags) -> None:
+def log_metric(
+    logger: structlog.stdlib.BoundLogger,
+    name: str,
+    value: float,
+    trace_id: str | None = None,
+    **tags: Any,
+) -> None:
     """Log a metric value."""
     logger.info(
         "metric",
         metric_name=name,
         metric_value=value,
         trace_id=trace_id or get_trace_id(),
-        **tags
+        **tags,
     )
