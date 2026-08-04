@@ -1,8 +1,6 @@
 """Pytest configuration for TradingOS."""
 
 import asyncio
-import sys
-from pathlib import Path
 
 import pytest
 
@@ -24,13 +22,13 @@ def reset_singletons():
     from tradingos.core.config import reset_config
     from tradingos.core.events import set_event_bus
     from tradingos.core.models import set_model_manager
-    
+
     reset_config()
     set_event_bus(None)
     set_model_manager(None)
-    
+
     yield
-    
+
     # Cleanup after test
     reset_config()
     set_event_bus(None)

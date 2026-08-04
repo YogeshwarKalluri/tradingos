@@ -6,10 +6,10 @@ __description__ = "Local AI-Powered Momentum Day Trading Platform"
 
 from tradingos.core import (
     get_config,
-    setup_logging,
-    get_logger,
     get_event_bus,
+    get_logger,
     get_model_manager,
+    setup_logging,
 )
 
 __all__ = [

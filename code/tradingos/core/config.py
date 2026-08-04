@@ -1,10 +1,11 @@
 """TradingOS Configuration Management."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
+
+import yaml
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import yaml
 
 
 class AppConfig(BaseSettings):
@@ -53,8 +54,8 @@ class ModelManagerConfig(BaseSettings):
 class ScannerConfig(BaseSettings):
     """Scanner module configuration."""
     deduplication_window_minutes: int = 5
-    priority_weights: Dict[str, float] = Field(default_factory=dict)
-    sources: Dict[str, Any] = Field(default_factory=dict)
+    priority_weights: dict[str, float] = Field(default_factory=dict)
+    sources: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_SCANNER_", extra="allow")
 
@@ -63,8 +64,8 @@ class MarketDataConfig(BaseSettings):
     """Market data module configuration."""
     duckdb_path: str = "data/market.duckdb"
     cache_ttl_seconds: int = 1
-    sources: Dict[str, Any] = Field(default_factory=dict)
-    gap_detection: Dict[str, Any] = Field(default_factory=dict)
+    sources: dict[str, Any] = Field(default_factory=dict)
+    gap_detection: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_MARKET_DATA_", extra="allow")
 
@@ -73,7 +74,7 @@ class ChartsConfig(BaseSettings):
     """Chart engine configuration."""
     timeframes: list[str] = Field(default_factory=lambda: ["1m", "5m", "15m", "1d"])
     output_shape: list[int] = Field(default_factory=lambda: [4, 256, 256, 3])
-    normalization: Dict[str, Any] = Field(default_factory=dict)
+    normalization: dict[str, Any] = Field(default_factory=dict)
     overlays: list[str] = Field(default_factory=list)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_CHARTS_", extra="allow")
@@ -95,7 +96,7 @@ class VisionConfig(BaseSettings):
     pattern_classes: list[str] = Field(default_factory=list)
     confidence_threshold: float = 0.65
     nms_iou_threshold: float = 0.45
-    models: Dict[str, Any] = Field(default_factory=dict)
+    models: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_VISION_", extra="allow")
 
@@ -107,26 +108,26 @@ class MemoryConfig(BaseSettings):
     vector_size: int = 768
     distance: str = "Cosine"
     duckdb_path: str = "data/trades.duckdb"
-    hnsw_config: Dict[str, Any] = Field(default_factory=dict)
+    hnsw_config: dict[str, Any] = Field(default_factory=dict)
     quantization: str = "scalar"
-    search: Dict[str, Any] = Field(default_factory=dict)
+    search: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_MEMORY_", extra="allow")
 
 
 class ReasoningConfig(BaseSettings):
     """Reasoning engine configuration."""
-    evidence_weights: Dict[str, float] = Field(default_factory=dict)
+    evidence_weights: dict[str, float] = Field(default_factory=dict)
     min_confidence: float = 0.55
-    llm_explainer: Dict[str, Any] = Field(default_factory=dict)
+    llm_explainer: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_REASONING_", extra="allow")
 
 
 class RiskConfig(BaseSettings):
     """Risk engine configuration."""
-    hard_rules: Dict[str, Any] = Field(default_factory=dict)
-    dynamic_rules: Dict[str, Any] = Field(default_factory=dict)
+    hard_rules: dict[str, Any] = Field(default_factory=dict)
+    dynamic_rules: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_RISK_")
 
@@ -134,8 +135,8 @@ class RiskConfig(BaseSettings):
 class ExecutionConfig(BaseSettings):
     """Execution engine configuration."""
     mode: str = "paper"
-    paper: Dict[str, Any] = Field(default_factory=dict)
-    live: Dict[str, Any] = Field(default_factory=dict)
+    paper: dict[str, Any] = Field(default_factory=dict)
+    live: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_EXECUTION_", extra="allow")
 
@@ -159,8 +160,8 @@ class VideoConfig(BaseSettings):
     charts_path: str = "knowledge/ross_videos/charts"
     review_queue_path: str = "knowledge/ross_videos/review_queue"
     frame_rate: int = 1
-    models: Dict[str, Any] = Field(default_factory=dict)
-    confidence_thresholds: Dict[str, Any] = Field(default_factory=dict)
+    models: dict[str, Any] = Field(default_factory=dict)
+    confidence_thresholds: dict[str, Any] = Field(default_factory=dict)
 
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_VIDEO_", extra="allow")
 
@@ -205,21 +206,21 @@ class Config:
         """Load configuration from YAML files."""
         # Config files are at project root /config, not inside code/
         base_path = Path(__file__).parent.parent.parent.parent / "config"
-        
+
         # Load base config
         with open(base_path / "base.yaml") as f:
             base = yaml.safe_load(f)
-        
+
         # Load environment-specific config
         env_file = base_path / f"{self.env}.yaml"
         env_config = {}
         if env_file.exists():
             with open(env_file) as f:
                 env_config = yaml.safe_load(f) or {}
-        
+
         # Merge configs (env overrides base)
         merged = self._deep_merge(base, env_config)
-        
+
         # Initialize sub-configs
         self.app = AppConfig(**merged.get("app", {}))
         self.market_hours = MarketHoursConfig(**merged.get("market_hours", {}))
@@ -252,10 +253,10 @@ class Config:
 
 
 # Global config instance
-_config: Optional[Config] = None
+_config: Config | None = None
 
 
-def get_config(env: Optional[str] = None) -> Config:
+def get_config(env: str | None = None) -> Config:
     """Get global configuration instance."""
     global _config
     if _config is None or (env is not None and _config.env != env):

@@ -3,16 +3,17 @@
 import sys
 import uuid
 from contextvars import ContextVar
-from typing import Any, Dict, Optional
-import structlog
+from datetime import UTC
+from typing import Any
+
 import orjson
+import structlog
 from structlog.types import EventDict, Processor
 
-from tradingos.core.config import get_config, LoggingConfig
-
+from tradingos.core.config import LoggingConfig, get_config
 
 # Context variable for trace ID propagation
-trace_id_var: ContextVar[Optional[str]] = ContextVar("trace_id", default=None)
+trace_id_var: ContextVar[str | None] = ContextVar("trace_id", default=None)
 
 
 def get_trace_id() -> str:
@@ -44,8 +45,8 @@ def add_trace_id(logger: Any, method_name: str, event_dict: EventDict) -> EventD
 
 def add_timestamp(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
     """Add ISO timestamp to log event."""
-    from datetime import datetime, timezone
-    event_dict["timestamp"] = datetime.now(timezone.utc).isoformat()
+    from datetime import datetime
+    event_dict["timestamp"] = datetime.now(UTC).isoformat()
     return event_dict
 
 
@@ -79,7 +80,7 @@ def console_renderer(logger: Any, method_name: str, event_dict: EventDict) -> st
     return structlog.dev.ConsoleRenderer(colors=True)(logger, method_name, event_dict)
 
 
-def setup_logging(config: Optional[LoggingConfig] = None) -> None:
+def setup_logging(config: LoggingConfig | None = None) -> None:
     """Configure structlog for TradingOS."""
     if config is None:
         config = get_config().logging
@@ -108,14 +109,14 @@ def setup_logging(config: Optional[LoggingConfig] = None) -> None:
 
     # Configure standard library logging
     import logging
-    
+
     # File handler (JSON)
     file_handler = logging.FileHandler(config.json_file)
     file_handler.setFormatter(structlog.stdlib.ProcessorFormatter(
         processor=json_renderer,
         foreign_pre_chain=shared_processors,
     ))
-    
+
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     if config.console:
@@ -148,16 +149,16 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
 
 class TraceContext:
     """Context manager for trace ID propagation."""
-    
-    def __init__(self, trace_id: Optional[str] = None):
+
+    def __init__(self, trace_id: str | None = None):
         self.trace_id = trace_id or str(uuid.uuid4())[:8]
         self.previous = None
-    
+
     def __enter__(self) -> str:
         self.previous = trace_id_var.get()
         trace_id_var.set(self.trace_id)
         return self.trace_id
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if self.previous is not None:
             trace_id_var.set(self.previous)
@@ -165,41 +166,41 @@ class TraceContext:
             clear_trace_id()
 
 
-def log_with_context(logger: structlog.stdlib.BoundLogger, 
-                     level: str, 
-                     message: str, 
+def log_with_context(logger: structlog.stdlib.BoundLogger,
+                     level: str,
+                     message: str,
                      **kwargs) -> None:
     """Log with automatic trace ID and context."""
     getattr(logger, level)(message, **kwargs)
 
 
 # Convenience functions for common log patterns
-def log_event_received(logger: structlog.stdlib.BoundLogger, 
-                       event_type: str, 
+def log_event_received(logger: structlog.stdlib.BoundLogger,
+                       event_type: str,
                        trace_id: str,
                        **extra) -> None:
     """Log event received."""
     logger.info("event_received", event_type=event_type, trace_id=trace_id, **extra)
 
 
-def log_event_published(logger: structlog.stdlib.BoundLogger, 
-                        event_type: str, 
+def log_event_published(logger: structlog.stdlib.BoundLogger,
+                        event_type: str,
                         trace_id: str,
                         **extra) -> None:
     """Log event published."""
     logger.info("event_published", event_type=event_type, trace_id=trace_id, **extra)
 
 
-def log_stage_start(logger: structlog.stdlib.BoundLogger, 
-                    stage: str, 
+def log_stage_start(logger: structlog.stdlib.BoundLogger,
+                    stage: str,
                     trace_id: str,
                     **extra) -> None:
     """Log pipeline stage start."""
     logger.info("stage_start", stage=stage, trace_id=trace_id, **extra)
 
 
-def log_stage_complete(logger: structlog.stdlib.BoundLogger, 
-                       stage: str, 
+def log_stage_complete(logger: structlog.stdlib.BoundLogger,
+                       stage: str,
                        trace_id: str,
                        duration_ms: float,
                        **extra) -> None:
@@ -207,20 +208,20 @@ def log_stage_complete(logger: structlog.stdlib.BoundLogger,
     logger.info("stage_complete", stage=stage, trace_id=trace_id, duration_ms=duration_ms, **extra)
 
 
-def log_stage_error(logger: structlog.stdlib.BoundLogger, 
-                    stage: str, 
+def log_stage_error(logger: structlog.stdlib.BoundLogger,
+                    stage: str,
                     trace_id: str,
                     error: Exception,
                     **extra) -> None:
     """Log pipeline stage error."""
-    logger.error("stage_error", stage=stage, trace_id=trace_id, 
+    logger.error("stage_error", stage=stage, trace_id=trace_id,
                  error_type=type(error).__name__, error_message=str(error), **extra)
 
 
-def log_metric(logger: structlog.stdlib.BoundLogger, 
-               name: str, 
-               value: float, 
-               trace_id: Optional[str] = None,
+def log_metric(logger: structlog.stdlib.BoundLogger,
+               name: str,
+               value: float,
+               trace_id: str | None = None,
                **tags) -> None:
     """Log a metric value."""
     logger.info("metric", metric_name=name, metric_value=value, trace_id=trace_id or get_trace_id(), **tags)

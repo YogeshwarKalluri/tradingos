@@ -2,40 +2,56 @@
 Tests for core/types.py
 """
 
-import pytest
 import time
 from datetime import datetime
 from uuid import UUID
 
+import pytest
+
 from core.types import (
-    Timeframe, Side, Action, OrderType, OrderStatus, PatternType, EventType,
-    Event, TickEvent, BarEvent, QuoteEvent, StockDetectedEvent,
-    ChartReadyEvent, PatternDetectedEvent, SimilarTradesFoundEvent,
-    TradeDecisionEvent, RiskApprovedEvent, RiskRejectedEvent,
-    OrderEvent, OrderSubmittedEvent, OrderFilledEvent,
-    PositionEvent, PositionOpenedEvent, PositionClosedEvent,
-    TradeRecordedEvent, ErrorEvent, HeartbeatEvent,
+    Action,
+    BarEvent,
+    ErrorEvent,
+    Event,
+    EventType,
+    HeartbeatEvent,
+    OrderFilledEvent,
+    OrderStatus,
+    OrderSubmittedEvent,
+    OrderType,
+    PatternDetectedEvent,
+    PatternType,
+    PositionClosedEvent,
+    PositionOpenedEvent,
+    RiskApprovedEvent,
+    RiskRejectedEvent,
+    Side,
+    StockDetectedEvent,
+    TickEvent,
+    Timeframe,
+    TradeDecisionEvent,
+    TradeRecordedEvent,
 )
 
 
 class TestEnums:
     """Test enum values."""
-    
+
     def test_timeframe_values(self):
         assert Timeframe.MIN_1 == "1m"
         assert Timeframe.MIN_5 == "5m"
         assert Timeframe.HOUR_1 == "1h"
         assert Timeframe.DAY_1 == "1d"
-    
+
     def test_side_values(self):
         assert Side.BUY == "buy"
         assert Side.SELL == "sell"
-    
+
     def test_action_values(self):
         assert Action.BUY == "buy"
         assert Action.SELL == "sell"
         assert Action.HOLD == "hold"
-    
+
     def test_pattern_type_values(self):
         assert PatternType.BULL_FLAG == "bull_flag"
         assert PatternType.VWAP_RECLAIM == "vwap_reclaim"
@@ -44,7 +60,7 @@ class TestEnums:
 
 class TestBaseEvent:
     """Test base Event class."""
-    
+
     def test_event_creation(self):
         event = Event(event_type=EventType.TICK, source="test")
         assert event.event_type == EventType.TICK
@@ -53,7 +69,7 @@ class TestBaseEvent:
         assert event.timestamp_ns > 0
         assert isinstance(event.correlation_id, UUID)
         assert isinstance(event.metadata, dict)
-    
+
     def test_timestamp_properties(self):
         event = Event(event_type=EventType.TICK)
         dt = event.timestamp
@@ -65,7 +81,7 @@ class TestBaseEvent:
 
 class TestTickEvent:
     """Test TickEvent."""
-    
+
     def test_tick_event_creation(self):
         tick = TickEvent(
             symbol="AAPL",
@@ -78,7 +94,7 @@ class TestTickEvent:
         assert tick.symbol == "AAPL"
         assert tick.price == 150.25
         assert tick.event_type == EventType.TICK
-    
+
     def test_tick_event_defaults(self):
         tick = TickEvent()
         assert tick.symbol == ""
@@ -88,7 +104,7 @@ class TestTickEvent:
 
 class TestBarEvent:
     """Test BarEvent."""
-    
+
     def test_bar_event_creation(self):
         bar = BarEvent(
             symbol="AAPL",
@@ -108,7 +124,7 @@ class TestBarEvent:
 
 class TestStockDetectedEvent:
     """Test StockDetectedEvent."""
-    
+
     def test_stock_detected_creation(self):
         event = StockDetectedEvent(
             symbol="AAPL",
@@ -129,7 +145,7 @@ class TestStockDetectedEvent:
 
 class TestPatternDetectedEvent:
     """Test PatternDetectedEvent."""
-    
+
     def test_pattern_detected_creation(self):
         event = PatternDetectedEvent(
             symbol="AAPL",
@@ -147,7 +163,7 @@ class TestPatternDetectedEvent:
 
 class TestTradeDecisionEvent:
     """Test TradeDecisionEvent."""
-    
+
     def test_trade_decision_creation(self):
         event = TradeDecisionEvent(
             symbol="AAPL",
@@ -169,7 +185,7 @@ class TestTradeDecisionEvent:
 
 class TestRiskEvents:
     """Test risk approval/rejection events."""
-    
+
     def test_risk_approved(self):
         decision = TradeDecisionEvent(
             symbol="AAPL", action=Action.BUY, confidence=0.8,
@@ -185,7 +201,7 @@ class TestRiskEvents:
         assert event.decision == decision
         assert "High volatility" in event.warnings
         assert event.event_type == EventType.RISK_APPROVED
-    
+
     def test_risk_rejected(self):
         decision = TradeDecisionEvent(
             symbol="AAPL", action=Action.BUY, confidence=0.8,
@@ -202,7 +218,7 @@ class TestRiskEvents:
 
 class TestOrderEvents:
     """Test order events."""
-    
+
     def test_order_submitted(self):
         event = OrderSubmittedEvent(
             order_id=UUID("12345678-1234-5678-1234-567812345678"),
@@ -217,7 +233,7 @@ class TestOrderEvents:
         assert event.order_type == OrderType.LIMIT
         assert event.status == OrderStatus.PENDING
         assert event.event_type == EventType.ORDER_SUBMITTED
-    
+
     def test_order_filled(self):
         event = OrderFilledEvent(
             symbol="AAPL",
@@ -233,7 +249,7 @@ class TestOrderEvents:
 
 class TestPositionEvents:
     """Test position events."""
-    
+
     def test_position_opened(self):
         event = PositionOpenedEvent(
             symbol="AAPL",
@@ -247,7 +263,7 @@ class TestPositionEvents:
         assert event.quantity == 100
         assert event.unrealized_pnl == 0.0  # not calculated yet
         assert event.event_type == EventType.POSITION_OPENED
-    
+
     def test_position_closed(self):
         event = PositionClosedEvent(
             symbol="AAPL",
@@ -264,7 +280,7 @@ class TestPositionEvents:
 
 class TestTradeRecordedEvent:
     """Test trade journal event."""
-    
+
     def test_trade_recorded(self):
         event = TradeRecordedEvent(
             symbol="AAPL",
@@ -290,7 +306,7 @@ class TestTradeRecordedEvent:
 
 class TestErrorEvent:
     """Test error event."""
-    
+
     def test_error_event(self):
         event = ErrorEvent(
             error_type="ConnectionError",
@@ -309,7 +325,7 @@ class TestErrorEvent:
 
 class TestHeartbeatEvent:
     """Test heartbeat event."""
-    
+
     def test_heartbeat(self):
         event = HeartbeatEvent(
             module="scanner",

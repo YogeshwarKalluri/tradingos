@@ -2,15 +2,13 @@
 
 import asyncio
 import uuid
-from abc import ABC, abstractmethod
 from collections import defaultdict
-from contextvars import ContextVar
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar
-import structlog
+from datetime import UTC, datetime
+from typing import Any, Optional, TypeVar
 
-from tradingos.core.logging import get_logger, get_trace_id, set_trace_id, clear_trace_id
+from tradingos.core.logging import clear_trace_id, get_logger, get_trace_id, set_trace_id
 
 logger = get_logger(__name__)
 
@@ -23,9 +21,9 @@ class Event:
     """Base event class with metadata."""
     event_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     trace_id: str = field(default_factory=get_trace_id)
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     source: str = "unknown"
-    
+
     def __post_init__(self):
         if not self.trace_id:
             self.trace_id = get_trace_id()
@@ -75,7 +73,7 @@ class VisionResult(Event):
 class MemoryResults(Event):
     """Similar historical trades retrieved."""
     candidate: "StockCandidate" = None
-    similar_trades: List["HistoricalTrade"] = field(default_factory=list)
+    similar_trades: list["HistoricalTrade"] = field(default_factory=list)
     source: str = "memory"
 
 
@@ -134,18 +132,18 @@ EventHandler = Callable[[Event], Any]
 
 class EventBus:
     """Async event bus with typed subscriptions."""
-    
+
     def __init__(self, queue_size: int = 10000, worker_count: int = 4):
         self.queue_size = queue_size
         self.worker_count = worker_count
-        self._subscribers: Dict[Type[Event], List[EventHandler]] = defaultdict(list)
-        self._queues: Dict[Type[Event], asyncio.Queue] = {}
-        self._workers: List[asyncio.Task] = []
+        self._subscribers: dict[type[Event], list[EventHandler]] = defaultdict(list)
+        self._queues: dict[type[Event], asyncio.Queue] = {}
+        self._workers: list[asyncio.Task] = []
         self._running = False
-        self._event_counts: Dict[str, int] = defaultdict(int)
-        self._latency_sum: Dict[str, float] = defaultdict(float)
-    
-    def subscribe(self, event_type: Type[EventT], handler: EventHandler) -> None:
+        self._event_counts: dict[str, int] = defaultdict(int)
+        self._latency_sum: dict[str, float] = defaultdict(float)
+
+    def subscribe(self, event_type: type[EventT], handler: EventHandler) -> None:
         """Subscribe handler to event type."""
         self._subscribers[event_type].append(handler)
         if event_type not in self._queues:
@@ -156,111 +154,111 @@ class EventBus:
                     task = asyncio.create_task(self._worker(event_type, self._queues[event_type], i))
                     self._workers.append(task)
         logger.debug("subscribed", event_type=event_type.__name__, handler=handler.__name__)
-    
-    def unsubscribe(self, event_type: Type[Event], handler: EventHandler) -> None:
+
+    def unsubscribe(self, event_type: type[Event], handler: EventHandler) -> None:
         """Unsubscribe handler from event type."""
         if handler in self._subscribers[event_type]:
             self._subscribers[event_type].remove(handler)
-    
+
     async def publish(self, event: Event) -> None:
         """Publish event to all subscribers."""
         event_type = type(event)
         self._event_counts[event_type.__name__] += 1
-        
+
         # Log event
-        logger.debug("event_published", 
-                    event_type=event_type.__name__, 
+        logger.debug("event_published",
+                    event_type=event_type.__name__,
                     trace_id=event.trace_id,
                     event_id=event.event_id)
-        
+
         # Put in queue for workers
         if event_type in self._queues:
             try:
                 self._queues[event_type].put_nowait(event)
             except asyncio.QueueFull:
                 logger.warning("event_queue_full", event_type=event_type.__name__)
-    
+
     async def publish_sync(self, event: Event) -> None:
         """Publish event and wait for all handlers to complete."""
         event_type = type(event)
         handlers = self._subscribers.get(event_type, [])
-        
+
         if not handlers:
             return
-        
-        start = datetime.now(timezone.utc)
-        
+
+        start = datetime.now(UTC)
+
         # Run all handlers concurrently
         await asyncio.gather(*[handler(event) for handler in handlers], return_exceptions=True)
-        
-        elapsed = (datetime.now(timezone.utc) - start).total_seconds() * 1000
+
+        elapsed = (datetime.now(UTC) - start).total_seconds() * 1000
         self._latency_sum[event_type.__name__] += elapsed
-        
-        logger.debug("event_processed_sync", 
-                    event_type=event_type.__name__, 
+
+        logger.debug("event_processed_sync",
+                    event_type=event_type.__name__,
                     handlers=len(handlers),
                     elapsed_ms=elapsed)
-    
+
     async def start(self) -> None:
         """Start event bus workers."""
         if self._running:
             return
-        
+
         self._running = True
-        
+
         # Start worker for each event type
         for event_type, queue in self._queues.items():
             for i in range(self.worker_count):
                 task = asyncio.create_task(self._worker(event_type, queue, i))
                 self._workers.append(task)
-        
+
         logger.info("event_bus_started", workers=len(self._workers))
-    
+
     async def stop(self) -> None:
         """Stop event bus workers."""
         if not self._running:
             return
-        
+
         self._running = False
-        
+
         # Cancel all workers
         for task in self._workers:
             task.cancel()
-        
+
         # Wait for cancellation
         await asyncio.gather(*self._workers, return_exceptions=True)
         self._workers.clear()
-        
+
         logger.info("event_bus_stopped")
-    
-    async def _worker(self, event_type: Type[Event], queue: asyncio.Queue, worker_id: int) -> None:
+
+    async def _worker(self, event_type: type[Event], queue: asyncio.Queue, worker_id: int) -> None:
         """Worker task to process events from queue."""
         logger.debug("worker_started", event_type=event_type.__name__, worker_id=worker_id)
-        
+
         while self._running:
             try:
                 event = await asyncio.wait_for(queue.get(), timeout=1.0)
-                
+
                 # Set trace context for this event
                 previous_trace = get_trace_id()
                 set_trace_id(event.trace_id)
-                
+
                 try:
                     handlers = self._subscribers.get(event_type, [])
                     if handlers:
-                        start = datetime.now(timezone.utc)
+                        start = datetime.now(UTC)
                         await asyncio.gather(*[handler(event) for handler in handlers], return_exceptions=True)
-                        elapsed = (datetime.now(timezone.utc) - start).total_seconds() * 1000
+                        elapsed = (datetime.now(UTC) - start).total_seconds() * 1000
                         self._latency_sum[event_type.__name__] += elapsed
-                        
-                        logger.debug("event_processed", 
-                                    event_type=event_type.__name__, 
+
+                        logger.debug("event_processed",
+                                    event_type=event_type.__name__,
                                     worker_id=worker_id,
                                     handlers=len(handlers),
                                     elapsed_ms=elapsed)
                 except Exception as e:
-                    logger.error("worker_error", 
-                                event_type=event_type.__name__, 
+                    logger.error("worker_error",
+                                event_type=event_type.__name__,
                                 worker_id=worker_id,
                                 error=str(e))
                 finally:
@@ -269,20 +267,20 @@ class EventBus:
                         set_trace_id(previous_trace)
                     else:
                         clear_trace_id()
-                        
-            except asyncio.TimeoutError:
+
+            except TimeoutError:
                 continue
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error("worker_exception", 
-                            event_type=event_type.__name__, 
+                logger.error("worker_exception",
+                            event_type=event_type.__name__,
                             worker_id=worker_id,
                             error=str(e))
-        
+
         logger.debug("worker_stopped", event_type=event_type.__name__, worker_id=worker_id)
-    
-    def get_stats(self) -> Dict[str, Any]:
+
+    def get_stats(self) -> dict[str, Any]:
         """Get event bus statistics."""
         stats = {}
         for event_name, count in self._event_counts.items():
@@ -296,7 +294,7 @@ class EventBus:
 
 
 # Global event bus instance
-_event_bus: Optional[EventBus] = None
+_event_bus: EventBus | None = None
 
 
 def get_event_bus() -> EventBus:
