@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tradingos"
+version = "0.1.0"
+description = "Local AI-Powered Momentum Day Trading Platform"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "pyyaml>=6.0",
+    "structlog>=24.1",
+    "orjson>=3.9",
+    "prometheus-client>=0.19",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "python-dotenv>=1.0",
+    "duckdb>=1.0",
+    "numpy>=1.26",
+    "numba>=0.59",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.1",
+    "ruff>=0.3",
+    "mypy>=1.8",
+    "black>=24.0",
+    "pre-commit>=3.6",
+    "pip-audit>=2.7",
+]
+vision = [
+    "onnxruntime>=1.18",
+    "tensorrt>=10.0",
+]
+video = [
+    "faster-whisper>=1.1",
+    "paddleocr>=2.8",
+    "pyannote.audio>=3.1",
+]
+llm = [
+    "llama-cpp-python>=0.2.80",
+]
+training = [
+    "torch>=2.3",
+    "torchvision>=0.18",
+    "mlflow>=2.10",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM", "T20"]
+ignore = ["S101", "T201"]
+per-file-ignores = { "tests/*" = ["S101"] }
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+strict_equality = true
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.setuptools.packages.find]
+where = ["code"]
+include = ["tradingos*"]

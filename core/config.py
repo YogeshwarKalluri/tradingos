@@ -182,6 +182,18 @@ class LoggingSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="TRADINGOS_LOGGING_")
 
 
+class TelegramSettings(BaseSettings):
+    """Telegram bot configuration."""
+    bot_token: str = "8974457297:AAF0P6nVQum8_10vkMr9BV_PA0AF5NBOQZ4"
+    chat_id: int = 0
+    enabled: bool = True
+    default_priority: str = "normal"
+    rate_limit_per_minute: int = 20
+    timeout_seconds: int = 10
+    
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_TELEGRAM_")
+
+
 class ModelManagerSettings(BaseSettings):
     """Model manager configuration."""
     device: str = "cuda"
@@ -249,6 +261,7 @@ class AppSettings(BaseSettings):
     learning: LearningSettings = Field(default_factory=LearningSettings)
     dashboard: DashboardSettings = Field(default_factory=DashboardSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    telegram: TelegramSettings = Field(default_factory=TelegramSettings)
     model_manager: ModelManagerSettings = Field(default_factory=ModelManagerSettings)
     databases: DatabaseSettings = Field(default_factory=DatabaseSettings)
     

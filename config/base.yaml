@@ -1,0 +1,244 @@
+# TradingOS Configuration
+
+## Base Configuration (shared across environments)
+# Override with environment-specific files: development.yaml, production.yaml
+
+app:
+  name: "TradingOS"
+  version: "0.1.0"
+  timezone: "America/New_York"
+  log_level: "INFO"
+
+# Market hours (ET)
+market_hours:
+  pre_market_start: "08:30"
+  market_open: "09:30"
+  market_close: "16:00"
+  post_market_end: "16:30"
+  timezone: "America/New_York"
+
+# Event bus settings
+event_bus:
+  queue_size: 10000
+  worker_count: 4
+  batch_timeout_ms: 10
+
+# Model Manager
+model_manager:
+  vram_budget_mb: 14336  # 14 GB (leave 2GB headroom on 16GB card)
+  headroom_mb: 2048
+  warmup_runs: 3
+  health_check_interval_sec: 60
+  auto_recover: true
+  market_hours_models:
+    - "vision_pattern"
+    - "vision_detect"
+    - "vision_keypoint"
+    - "reasoning_llm"
+    - "embed_text"
+  after_hours_models:
+    - "stt_whisper"
+    - "diarization"
+    - "chart_classify"
+    - "chart_detect"
+    - "ocr_paddle"
+    - "extract_llm"
+
+# Scanner module
+scanner:
+  sources:
+    file_watch:
+      enabled: true
+      path: "data/scanner/inbox"
+      pattern: "*.jsonl"
+    webhook:
+      enabled: true
+      port: 8081
+      path: "/scanner/candidates"
+    ipc:
+      enabled: false
+      pipe_name: "tradingos_scanner"
+  deduplication_window_minutes: 5
+  priority_weights:
+    rel_volume: 1.0
+    gap_pct: 1.0
+    float_shares: -0.5  # Lower float = higher priority
+    time_of_day: 0.3
+
+# Market Data module
+market_data:
+  duckdb_path: "data/market.duckdb"
+  cache_ttl_seconds: 1
+  sources:
+    polygon:
+      enabled: true
+      api_key_env: "POLYGON_API_KEY"
+      websocket_url: "wss://socket.polygon.io/stocks"
+    alpaca:
+      enabled: true
+      api_key_env: "ALPACA_API_KEY"
+      secret_key_env: "ALPACA_SECRET_KEY"
+      websocket_url: "wss://stream.data.alpaca.markets/v2/iex"
+  gap_detection:
+    max_gap_minutes: 5
+    interpolate_small_gaps: true
+
+# Chart Engine
+charts:
+  timeframes: ["1m", "5m", "15m", "1d"]
+  output_shape: [4, 256, 256, 3]  # [timeframes, H, W, channels]
+  normalization:
+    price_range: [0, 1]
+    volume_range: [0, 1]
+  overlays:
+    - "candlestick"
+    - "volume"
+    - "vwap"
+    - "ema_9"
+    - "ema_20"
+    - "ema_50"
+
+# Indicators
+indicators:
+  vwap: true
+  ema_periods: [9, 20, 50, 200]
+  atr_period: 14
+  rsi_period: 14
+  rvol_lookback_days: 20
+
+# Vision Engine
+vision:
+  pattern_classes:
+    - "bull_flag"
+    - "bear_flag"
+    - "flat_top_breakout"
+    - "vwap_reclaim"
+    - "high_tight_flag"
+    - "abcd"
+    - "double_bottom"
+    - "cup_and_handle"
+  confidence_threshold: 0.65
+  nms_iou_threshold: 0.45
+  models:
+    pattern_classifier:
+      path: "models/tensorrt/vision_pattern_fp16.engine"
+      input_shape: [1, 3, 256, 256]
+    object_detector:
+      path: "models/tensorrt/yolov8n_fp16.engine"
+      input_shape: [1, 3, 256, 256]
+    keypoint_detector:
+      path: "models/tensorrt/hrnet_w18_fp16.engine"
+      input_shape: [1, 3, 256, 256]
+
+# Memory Engine
+memory:
+  qdrant_path: "data/qdrant"
+  collection_name: "trade_embeddings"
+  vector_size: 768
+  distance: "Cosine"
+  hnsw_config:
+    m: 16
+    ef_construct: 200
+    ef_search: 128
+  quantization: "scalar"  # INT8
+  duckdb_path: "data/trades.duckdb"
+  search:
+    default_k: 10
+    max_k: 50
+    filters:
+      enabled: true
+      min_similarity: 0.5
+
+# Reasoning Engine
+reasoning:
+  evidence_weights:
+    vision: 0.30
+    indicators: 0.20
+    memory: 0.25
+    market_context: 0.15
+    news: 0.10
+  min_confidence: 0.55
+  llm_explainer:
+    enabled: true
+    model: "reasoning_llm"
+    timeout_ms: 2000
+
+# Risk Engine
+risk:
+  hard_rules:
+    max_position_pct: 0.10
+    max_daily_loss_pct: 0.02
+    max_drawdown_pct: 0.05
+    max_open_positions: 3
+    min_risk_reward: 1.5
+    max_hold_minutes: 240
+    forbidden_tickers: []
+    forbidden_hours: [16, 17, 18]
+  dynamic_rules:
+    volatility_adjustment: true
+    correlation_limit: 2
+    time_of_day_scaling: true
+    daily_loss_circuit_breaker: true
+
+# Execution Engine
+execution:
+  mode: "paper"  # paper, live
+  paper:
+    slippage_model:
+      base_spread_pct: 0.0005
+      volatility_factor: 0.1
+      size_factor: 0.05
+    latency_simulation_ms: 20
+    partial_fill_threshold: 0.1  # 10% of daily volume
+  live:
+    broker: "alpaca"  # alpaca, ibkr
+    # Broker-specific config in broker configs
+
+# Journal
+journal:
+  jsonl_path: "data/journal/decisions"
+  duckdb_path: "data/journal.duckdb"
+  batch_size: 100
+  flush_interval_sec: 5
+
+# Video Pipeline
+video:
+  inbox_path: "knowledge/ross_videos/inbox"
+  processing_path: "knowledge/ross_videos/processing"
+  done_path: "knowledge/ross_videos/done"
+  failed_path: "knowledge/ross_videos/failed"
+  charts_path: "knowledge/ross_videos/charts"
+  review_queue_path: "knowledge/ross_videos/review_queue"
+  frame_rate: 1  # fps
+  models:
+    stt: "stt_whisper"
+    diarization: "diarization"
+    chart_classify: "chart_classify"
+    chart_detect: "chart_detect"
+    ocr: "ocr_paddle"
+    extract_llm: "extract_llm"
+    pattern_labeler: "vision_pattern"
+  confidence_thresholds:
+    trade_extraction: 0.7
+    pattern_labeling: 0.6
+    ocr_ticker: 0.8
+
+# Dashboard
+dashboard:
+  host: "0.0.0.0"
+  port: 8080
+  websocket_ping_interval: 30
+  update_batch_ms: 100
+
+# Health & Monitoring
+health:
+  port: 8080
+  path: "/health"
+  metrics_path: "/metrics"
+
+# Logging
+logging:
+  level: "INFO"
+  json_file: "logs/tradingos.jsonl"
+  console: true
+  trace_id_header: "x-trace-id"

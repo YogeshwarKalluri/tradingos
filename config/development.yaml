@@ -1,0 +1,30 @@
+# Development overrides
+app:
+  log_level: "DEBUG"
+
+logging:
+  level: "DEBUG"
+  console: true
+
+market_data:
+  sources:
+    polygon:
+      enabled: false  # Use mock in development
+    alpaca:
+      enabled: false
+
+scanner:
+  sources:
+    file_watch:
+      enabled: true
+      path: "data/scanner/inbox"
+    webhook:
+      enabled: true
+      port: 8081
+
+dashboard:
+  host: "127.0.0.1"
+
+model_manager:
+  market_hours_models: []  # Don't load real models in dev
+  after_hours_models: []
