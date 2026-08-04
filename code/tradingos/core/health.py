@@ -1,5 +1,6 @@
 """TradingOS Health & Metrics Endpoints."""
 
+from datetime import UTC, datetime
 
 import structlog
 from fastapi import FastAPI, Response
@@ -71,7 +72,7 @@ class HealthServer:
                 "vram": vram,
                 "models_loaded": len(model_manager._loaded_models),
                 "event_stats": event_stats,
-                "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat()
+                "timestamp": datetime.now(UTC).isoformat(),
             }
 
         @self.app.get(self.config.metrics_path)

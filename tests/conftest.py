@@ -1,6 +1,7 @@
 """Pytest configuration for TradingOS."""
 
 import asyncio
+import contextlib
 
 import pytest
 
@@ -41,7 +42,5 @@ def pytest_configure(config):
 
 
 # Async test support
-try:
-    import pytest_asyncio
-except ImportError:
+with contextlib.suppress(ImportError):
     pass

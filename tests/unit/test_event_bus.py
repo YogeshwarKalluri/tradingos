@@ -109,8 +109,6 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def test_publish_sync(self, bus):
         """Test synchronous publish with results."""
-        results = []
-
         async def handler1(event: Event):
             await asyncio.sleep(0.001)
             return "result1"

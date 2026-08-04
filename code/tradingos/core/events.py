@@ -1,14 +1,28 @@
 """TradingOS Event Bus - Async Pub/Sub with Typed Events."""
 
+from __future__ import annotations
+
 import asyncio
 import uuid
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
+from tradingos.core.config import get_config
 from tradingos.core.logging import clear_trace_id, get_logger, get_trace_id, set_trace_id
+
+if TYPE_CHECKING:
+    from tradingos.modules.charts import ChartTensor
+    from tradingos.modules.execution import Fill, Order
+    from tradingos.modules.indicators import IndicatorSnapshot
+    from tradingos.modules.market import MarketData
+    from tradingos.modules.memory import HistoricalTrade
+    from tradingos.modules.reasoning import TradeThesis
+    from tradingos.modules.risk import RiskDecisionResult
+    from tradingos.modules.scanner import StockCandidate
+    from tradingos.modules.vision import VisionOutput
 
 logger = get_logger(__name__)
 
@@ -33,77 +47,77 @@ class Event:
 @dataclass
 class StockDetected(Event):
     """Scanner detected a new candidate."""
-    candidate: "StockCandidate" = None  # Forward reference
+    candidate: StockCandidate = None  # Forward reference - defined in scanner module
     source: str = "scanner"
 
 
 @dataclass
 class MarketDataReady(Event):
     """Market data enriched for candidate."""
-    candidate: "StockCandidate" = None
-    market_data: "MarketData" = None
+    candidate: StockCandidate = None
+    market_data: MarketData = None
     source: str = "market_data"
 
 
 @dataclass
 class ChartReady(Event):
     """Chart tensor generated for candidate."""
-    candidate: "StockCandidate" = None
-    chart_tensor: "ChartTensor" = None
+    candidate: StockCandidate = None
+    chart_tensor: ChartTensor = None
     source: str = "charts"
 
 
 @dataclass
 class IndicatorsReady(Event):
     """Indicators calculated for candidate."""
-    candidate: "StockCandidate" = None
-    indicators: "IndicatorSnapshot" = None
+    candidate: StockCandidate = None
+    indicators: IndicatorSnapshot = None
     source: str = "indicators"
 
 
 @dataclass
 class VisionResult(Event):
     """Vision analysis complete for candidate."""
-    candidate: "StockCandidate" = None
-    vision_output: "VisionOutput" = None
+    candidate: StockCandidate = None
+    vision_output: VisionOutput = None
     source: str = "vision"
 
 
 @dataclass
 class MemoryResults(Event):
     """Similar historical trades retrieved."""
-    candidate: "StockCandidate" = None
-    similar_trades: list["HistoricalTrade"] = field(default_factory=list)
+    candidate: StockCandidate = None
+    similar_trades: list[HistoricalTrade] = field(default_factory=list)
     source: str = "memory"
 
 
 @dataclass
 class ThesisReady(Event):
     """Reasoning engine produced trade thesis."""
-    candidate: "StockCandidate" = None
-    thesis: "TradeThesis" = None
+    candidate: StockCandidate = None
+    thesis: TradeThesis = None
     source: str = "reasoning"
 
 
 @dataclass
 class RiskDecision(Event):
     """Risk engine decision."""
-    candidate: "StockCandidate" = None
-    decision: "RiskDecisionResult" = None
+    candidate: StockCandidate = None
+    decision: RiskDecisionResult = None
     source: str = "risk"
 
 
 @dataclass
 class OrderSubmitted(Event):
     """Order submitted to execution engine."""
-    order: "Order" = None
+    order: Order = None
     source: str = "execution"
 
 
 @dataclass
 class FillReceived(Event):
     """Fill received from execution."""
-    fill: "Fill" = None
+    fill: Fill = None
     source: str = "execution"
 
 
@@ -113,7 +127,7 @@ class PipelineError(Event):
     stage: str = ""
     error_type: str = ""
     error_message: str = ""
-    candidate: Optional["StockCandidate"] = None
+    candidate: StockCandidate | None = None
     source: str = "pipeline"
 
 
@@ -151,7 +165,9 @@ class EventBus:
             # If bus is running, start workers for this new queue
             if self._running:
                 for i in range(self.worker_count):
-                    task = asyncio.create_task(self._worker(event_type, self._queues[event_type], i))
+                    task = asyncio.create_task(
+                        self._worker(event_type, self._queues[event_type], i)
+                    )
                     self._workers.append(task)
         logger.debug("subscribed", event_type=event_type.__name__, handler=handler.__name__)
 
@@ -189,15 +205,19 @@ class EventBus:
         start = datetime.now(UTC)
 
         # Run all handlers concurrently
-        await asyncio.gather(*[handler(event) for handler in handlers], return_exceptions=True)
+        await asyncio.gather(
+            *[handler(event) for handler in handlers], return_exceptions=True
+        )
 
         elapsed = (datetime.now(UTC) - start).total_seconds() * 1000
         self._latency_sum[event_type.__name__] += elapsed
 
-        logger.debug("event_processed_sync",
-                    event_type=event_type.__name__,
-                    handlers=len(handlers),
-                    elapsed_ms=elapsed)
+        logger.debug(
+            "event_processed_sync",
+            event_type=event_type.__name__,
+            handlers=len(handlers),
+            elapsed_ms=elapsed,
+        )
 
     async def start(self) -> None:
         """Start event bus workers."""
@@ -247,20 +267,26 @@ class EventBus:
                     handlers = self._subscribers.get(event_type, [])
                     if handlers:
                         start = datetime.now(UTC)
-                        await asyncio.gather(*[handler(event) for handler in handlers], return_exceptions=True)
+                        await asyncio.gather(
+                            *[handler(event) for handler in handlers], return_exceptions=True
+                        )
                         elapsed = (datetime.now(UTC) - start).total_seconds() * 1000
                         self._latency_sum[event_type.__name__] += elapsed
 
-                        logger.debug("event_processed",
-                                    event_type=event_type.__name__,
-                                    worker_id=worker_id,
-                                    handlers=len(handlers),
-                                    elapsed_ms=elapsed)
+                        logger.debug(
+                            "event_processed",
+                            event_type=event_type.__name__,
+                            worker_id=worker_id,
+                            handlers=len(handlers),
+                            elapsed_ms=elapsed,
+                        )
                 except Exception as e:
-                    logger.error("worker_error",
-                                event_type=event_type.__name__,
-                                worker_id=worker_id,
-                                error=str(e))
+                    logger.error(
+                        "worker_error",
+                        event_type=event_type.__name__,
+                        worker_id=worker_id,
+                        error=str(e),
+                    )
                 finally:
                     # Restore trace context
                     if previous_trace:
@@ -273,10 +299,12 @@ class EventBus:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error("worker_exception",
-                            event_type=event_type.__name__,
-                            worker_id=worker_id,
-                            error=str(e))
+                logger.error(
+                    "worker_exception",
+                    event_type=event_type.__name__,
+                    worker_id=worker_id,
+                    error=str(e),
+                )
 
         logger.debug("worker_stopped", event_type=event_type.__name__, worker_id=worker_id)
 
@@ -285,10 +313,12 @@ class EventBus:
         stats = {}
         for event_name, count in self._event_counts.items():
             avg_latency = self._latency_sum[event_name] / count if count > 0 else 0
+            queue = self._queues.get(event_name)
+            queue_size = queue.qsize() if queue else 0
             stats[event_name] = {
                 "count": count,
                 "avg_latency_ms": round(avg_latency, 2),
-                "queue_size": self._queues.get(event_name, asyncio.Queue()).qsize() if event_name in self._queues else 0
+                "queue_size": queue_size,
             }
         return stats
 

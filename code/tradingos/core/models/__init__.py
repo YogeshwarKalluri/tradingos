@@ -1,14 +1,11 @@
 """TradingOS Model Manager - Load, manage, and swap AI models."""
 
 import asyncio
+import contextlib
 import threading
-import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Type
-
-import structlog
+from typing import TYPE_CHECKING, Any, Optional
 
 try:
     import torch
@@ -19,6 +16,9 @@ except ImportError:
 
 from tradingos.core.config import ModelManagerConfig, get_config
 from tradingos.core.logging import get_logger
+
+if TYPE_CHECKING:
+    import torch
 
 logger = get_logger(__name__)
 
@@ -102,10 +102,20 @@ class ModelManager:
         self._running = False
 
     def register(self, entry: ModelRegistryEntry) -> None:
-        """Register a model in the registry."""
-        with self._lock:
-            self.registry[entry.name] = entry
-            logger.info("model_registered", name=entry.name, version=entry.version, vram_mb=entry.metadata.vram_mb if hasattr(entry, 'metadata') else 'unknown')
+            """Register a model in the registry."""
+            with self._lock:
+                self.registry[entry.name] = entry
+                vram_str = (
+                    str(entry.metadata.vram_mb)
+                    if hasattr(entry, "metadata")
+                    else "unknown"
+                )
+                logger.info(
+                    "model_registered",
+                    name=entry.name,
+                    version=entry.version,
+                    vram_mb=vram_str,
+                )
 
     def register_from_dict(self, name: str, loader: str, path: str,
                           priority: int = 50, kwargs: dict | None = None,
@@ -171,11 +181,17 @@ class ModelManager:
                 self._evict_lru(estimated_vram)
 
                 if self._vram_used_mb + estimated_vram > self.config.vram_budget_mb:
-                    raise RuntimeError(f"Insufficient VRAM for {name}: need {estimated_vram}MB, have {self.config.vram_budget_mb - self._vram_used_mb}MB free")
+                    raise RuntimeError(
+                        f"Insufficient VRAM for {name}: "
+                        f"need {estimated_vram}MB, "
+                        f"have {self.config.vram_budget_mb - self._vram_used_mb}MB free"
+                    )
 
             # Load model
             if TORCH_AVAILABLE:
-                device = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
+                device = device or (
+                    torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+                )
             else:
                 device = None
             model_class = self._import_loader(entry.loader)
@@ -188,7 +204,9 @@ class ModelManager:
             entry.loaded = True
             entry.instance = model
 
-            logger.info("model_loaded", name=name, vram_used_mb=self._vram_used_mb, device=str(device))
+            logger.info(
+            "model_loaded", name=name, vram_used_mb=self._vram_used_mb, device=str(device)
+        )
             return model
 
     def unload_model(self, name: str) -> None:
@@ -280,10 +298,8 @@ class ModelManager:
         self._running = False
         if self._health_check_task:
             self._health_check_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._health_check_task
-            except asyncio.CancelledError:
-                pass
         logger.info("health_checks_stopped")
 
     async def _health_check_loop(self) -> None:

@@ -224,4 +224,10 @@ def log_metric(logger: structlog.stdlib.BoundLogger,
                trace_id: str | None = None,
                **tags) -> None:
     """Log a metric value."""
-    logger.info("metric", metric_name=name, metric_value=value, trace_id=trace_id or get_trace_id(), **tags)
+    logger.info(
+        "metric",
+        metric_name=name,
+        metric_value=value,
+        trace_id=trace_id or get_trace_id(),
+        **tags
+    )
