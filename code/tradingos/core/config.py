@@ -54,24 +54,29 @@ class ScannerConfig(BaseSettings):
     """Scanner module configuration."""
     deduplication_window_minutes: int = 5
     priority_weights: Dict[str, float] = Field(default_factory=dict)
+    sources: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_SCANNER_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_SCANNER_", extra="allow")
 
 
 class MarketDataConfig(BaseSettings):
     """Market data module configuration."""
     duckdb_path: str = "data/market.duckdb"
     cache_ttl_seconds: int = 1
+    sources: Dict[str, Any] = Field(default_factory=dict)
+    gap_detection: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_MARKET_DATA_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_MARKET_DATA_", extra="allow")
 
 
 class ChartsConfig(BaseSettings):
     """Chart engine configuration."""
     timeframes: list[str] = Field(default_factory=lambda: ["1m", "5m", "15m", "1d"])
     output_shape: list[int] = Field(default_factory=lambda: [4, 256, 256, 3])
+    normalization: Dict[str, Any] = Field(default_factory=dict)
+    overlays: list[str] = Field(default_factory=list)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_CHARTS_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_CHARTS_", extra="allow")
 
 
 class IndicatorsConfig(BaseSettings):
@@ -90,8 +95,9 @@ class VisionConfig(BaseSettings):
     pattern_classes: list[str] = Field(default_factory=list)
     confidence_threshold: float = 0.65
     nms_iou_threshold: float = 0.45
+    models: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_VISION_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_VISION_", extra="allow")
 
 
 class MemoryConfig(BaseSettings):
@@ -101,16 +107,20 @@ class MemoryConfig(BaseSettings):
     vector_size: int = 768
     distance: str = "Cosine"
     duckdb_path: str = "data/trades.duckdb"
+    hnsw_config: Dict[str, Any] = Field(default_factory=dict)
+    quantization: str = "scalar"
+    search: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_MEMORY_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_MEMORY_", extra="allow")
 
 
 class ReasoningConfig(BaseSettings):
     """Reasoning engine configuration."""
     evidence_weights: Dict[str, float] = Field(default_factory=dict)
     min_confidence: float = 0.55
+    llm_explainer: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_REASONING_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_REASONING_", extra="allow")
 
 
 class RiskConfig(BaseSettings):
@@ -124,8 +134,10 @@ class RiskConfig(BaseSettings):
 class ExecutionConfig(BaseSettings):
     """Execution engine configuration."""
     mode: str = "paper"
+    paper: Dict[str, Any] = Field(default_factory=dict)
+    live: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_EXECUTION_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_EXECUTION_", extra="allow")
 
 
 class JournalConfig(BaseSettings):
@@ -147,8 +159,10 @@ class VideoConfig(BaseSettings):
     charts_path: str = "knowledge/ross_videos/charts"
     review_queue_path: str = "knowledge/ross_videos/review_queue"
     frame_rate: int = 1
+    models: Dict[str, Any] = Field(default_factory=dict)
+    confidence_thresholds: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = SettingsConfigDict(env_prefix="TRADINGOS_VIDEO_")
+    model_config = SettingsConfigDict(env_prefix="TRADINGOS_VIDEO_", extra="allow")
 
 
 class DashboardConfig(BaseSettings):
@@ -189,7 +203,8 @@ class Config:
 
     def _load_configs(self):
         """Load configuration from YAML files."""
-        base_path = Path(__file__).parent.parent.parent / "config"
+        # Config files are at project root /config, not inside code/
+        base_path = Path(__file__).parent.parent.parent.parent / "config"
         
         # Load base config
         with open(base_path / "base.yaml") as f:

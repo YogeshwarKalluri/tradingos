@@ -28,3 +28,8 @@ dashboard:
 model_manager:
   market_hours_models: []  # Don't load real models in dev
   after_hours_models: []
+
+event_bus:
+  queue_size: 10000
+  worker_count: 4
+  batch_timeout_ms: 10

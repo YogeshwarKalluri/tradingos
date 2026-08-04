@@ -24,7 +24,17 @@ class TestEventBus:
         )
         set_event_bus(bus)
         yield bus
-        asyncio.run(bus.stop())
+        # Properly stop the bus using the existing event loop
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Schedule stop on the running loop
+                asyncio.create_task(bus.stop())
+            else:
+                loop.run_until_complete(bus.stop())
+        except RuntimeError:
+            # No event loop, ignore
+            pass
     
     @pytest.mark.asyncio
     async def test_subscribe_and_publish(self):

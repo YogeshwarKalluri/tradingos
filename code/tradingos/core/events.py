@@ -150,6 +150,11 @@ class EventBus:
         self._subscribers[event_type].append(handler)
         if event_type not in self._queues:
             self._queues[event_type] = asyncio.Queue(maxsize=self.queue_size)
+            # If bus is running, start workers for this new queue
+            if self._running:
+                for i in range(self.worker_count):
+                    task = asyncio.create_task(self._worker(event_type, self._queues[event_type], i))
+                    self._workers.append(task)
         logger.debug("subscribed", event_type=event_type.__name__, handler=handler.__name__)
     
     def unsubscribe(self, event_type: Type[Event], handler: EventHandler) -> None:
