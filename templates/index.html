@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingOS Dashboard</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'JetBrains Mono', monospace; background: #0d1117; color: #e6edf3; }
+        .header { background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.5rem; color: #58a6ff; }
+        .status { display: flex; gap: 1rem; align-items: center; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .status-dot.connected { background: #3fb950; }
+        .status-dot.disconnected { background: #f85149; }
+        .main { display: grid; grid-template-columns: 1fr 400px; gap: 1rem; padding: 1rem; }
+        .panel { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; }
+        .panel h2 { font-size: 1rem; color: #8b949e; margin-bottom: 1rem; border-bottom: 1px solid #30363d; padding-bottom: 0.5rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+        .metric { background: #0d1117; border: 1px solid #21262d; border-radius: 4px; padding: 0.75rem; }
+        .metric-label { font-size: 0.75rem; color: #8b949e; text-transform: uppercase; }
+        .metric-value { font-size: 1.5rem; font-weight: bold; color: #e6edf3; }
+        .metric-value.positive { color: #3fb950; }
+        .metric-value.negative { color: #f85149; }
+        .scanner-list { max-height: 400px; overflow-y: auto; }
+        .scanner-item { display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #21262d; }
+        .scanner-item:hover { background: #1c2128; }
+        .scanner-ticker { font-weight: bold; color: #58a6ff; }
+        .scanner-meta { display: flex; gap: 1rem; font-size: 0.8rem; color: #8b949e; }
+        .chart-container { height: 300px; position: relative; }
+        .log-panel { max-height: 300px; overflow-y: auto; font-size: 0.75rem; font-family: monospace; }
+        .log-entry { padding: 0.25rem 0; border-bottom: 1px solid #21262d; }
+        .log-entry.error { color: #f85149; }
+        .log-entry.warn { color: #d29922; }
+        .log-entry.info { color: #58a6ff; }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .tab { padding: 0.5rem 1rem; background: #21262d; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; color: #8b949e; }
+        .tab.active { background: #58a6ff; color: #0d1117; border-color: #58a6ff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        @media (max-width: 1000px) {
+            .main { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>TradingOS</h1>
+        <div class="status">
+            <span class="status-dot connected" id="ws-status"></span>
+            <span id="ws-text">Connected</span>
+            <span id="market-status" class="metric-value">PRE-MARKET</span>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="panel">
+            <h2>Scanner Candidates</h2>
+            <div class="scanner-list" id="scanner-list" hx-ext="ws" ws-connect="/ws">
+                <div class="scanner-item">
+                    <span class="scanner-ticker">AAPL</span>
+                    <div class="scanner-meta">
+                        <span>$189.50</span>
+                        <span>Gap: +3.2%</span>
+                        <span>RVol: 2.1x</span>
+                    </div>
+                </div>
+                <div class="scanner-item">
+                    <span class="scanner-ticker">TSLA</span>
+                    <div class="scanner-meta">
+                        <span>$245.30</span>
+                        <span>Gap: +5.8%</span>
+                        <span>RVol: 3.4x</span>
+                    </div>
+                </div>
+                <div class="scanner-item">
+                    <span class="scanner-ticker">NVDA</span>
+                    <div class="scanner-meta">
+                        <span>$425.75</span>
+                        <span>Gap: +2.1%</span>
+                        <span>RVol: 1.8x</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="panel">
+            <h2>Account</h2>
+            <div class="grid-2">
+                <div class="metric">
+                    <div class="metric-label">Equity</div>
+                    <div class="metric-value positive">$100,000.00</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Buying Power</div>
+                    <div class="metric-value">$200,000.00</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Day P/L</div>
+                    <div class="metric-value positive" id="day-pl">+$0.00</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Open Positions</div>
+                    <div class="metric-value" id="open-pos">0</div>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 1rem;">AI Analysis</h2>
+            <div class="metric" style="background: #0d1117;">
+                <div class="metric-label">Current Setup</div>
+                <div class="metric-value" id="ai-setup">Bull Flag</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Confidence</div>
+                <div class="metric-value positive" id="ai-conf">78%</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Similar Trades</div>
+                <div class="metric-value" id="ai-similar">247</div>
+            </div>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #8b949e;" id="ai-reasoning">
+                Strong volume on breakout above VWAP. Historical win rate 72%.
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const ws = new WebSocket(`ws://${location.host}/ws`);
+        const statusDot = document.getElementById('ws-status');
+        const statusText = document.getElementById('ws-text');
+
+        ws.onopen = () => {
+            statusDot.className = 'status-dot connected';
+            statusText.textContent = 'Connected';
+        };
+
+        ws.onclose = () => {
+            statusDot.className = 'status-dot disconnected';
+            statusText.textContent = 'Disconnected - Reconnecting...';
+            setTimeout(() => location.reload(), 5000);
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            handleMessage(data);
+        };
+
+        function handleMessage(data) {
+            if (data.type === 'scanner_update') {
+                updateScanner(data.payload);
+            } else if (data.type === 'account_update') {
+                updateAccount(data.payload);
+            } else if (data.type === 'ai_analysis') {
+                updateAI(data.payload);
+            } else if (data.type === 'log') {
+                addLogEntry(data.payload);
+            }
+        }
+
+        function updateScanner(candidates) {
+            const list = document.getElementById('scanner-list');
+            if (!candidates.length) return;
+            list.innerHTML = candidates.map(c => `
+                <div class="scanner-item">
+                    <span class="scanner-ticker">${c.ticker}</span>
+                    <div class="scanner-meta">
+                        <span>$${c.price.toFixed(2)}</span>
+                        <span>Gap: ${c.gap_pct >= 0 ? '+' : ''}${c.gap_pct.toFixed(1)}%</span>
+                        <span>RVol: ${c.rel_volume.toFixed(1)}x</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateAccount(account) {
+            document.getElementById('day-pl').textContent = (account.day_pl >= 0 ? '+' : '') + '$' + account.day_pl.toFixed(2);
+            document.getElementById('day-pl').className = 'metric-value ' + (account.day_pl >= 0 ? 'positive' : 'negative');
+            document.getElementById('open-pos').textContent = account.open_positions;
+        }
+
+        function updateAI(analysis) {
+            document.getElementById('ai-setup').textContent = analysis.pattern;
+            document.getElementById('ai-conf').textContent = (analysis.confidence * 100).toFixed(0) + '%';
+            document.getElementById('ai-similar').textContent = analysis.similar_count;
+            document.getElementById('ai-reasoning').textContent = analysis.reasoning;
+        }
+
+        function addLogEntry(entry) {
+            const panel = document.getElementById('log-panel');
+            const div = document.createElement('div');
+            div.className = 'log-entry ' + entry.level;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${entry.message}`;
+            panel.insertBefore(div, panel.firstChild);
+            while (panel.children.length > 100) panel.removeChild(panel.lastChild);
+        }
+    </script>
+</body>
+</html>

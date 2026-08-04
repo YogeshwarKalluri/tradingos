@@ -10,6 +10,7 @@ from tradingos.core.events import get_event_bus
 from tradingos.core.health import create_health_app
 from tradingos.core.logging import get_logger, setup_logging
 from tradingos.core.models import get_model_manager
+from tradingos.modules.dashboard import create_dashboard
 
 logger = get_logger(__name__)
 
@@ -46,6 +47,9 @@ class TradingOS:
 
         # Create health server app
         self.health_server = create_health_app(self.config.health)
+
+        # Create dashboard
+        create_dashboard(self.health_server)
 
         logger.info("tradingos_initialized")
 
