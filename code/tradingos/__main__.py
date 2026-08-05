@@ -176,6 +176,8 @@ def health(ctx):
 
     import uvicorn
     health_app = create_health_app(config.health)
+    # Also add dashboard
+    create_dashboard(health_app)
     uvicorn.run(health_app, host="0.0.0.0", port=config.health.port, log_level="warning")
 
 

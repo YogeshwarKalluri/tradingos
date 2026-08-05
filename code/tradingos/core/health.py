@@ -55,7 +55,8 @@ class HealthServer:
             issues = []
 
             # Check VRAM
-            if vram["used_mb"] > self.config.vram_budget_mb * 0.95:
+            model_manager_config = get_config().model_manager
+            if vram["used_mb"] > model_manager_config.vram_budget_mb * 0.95:
                 healthy = False
                 issues.append("VRAM near capacity")
 

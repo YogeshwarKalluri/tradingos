@@ -4,6 +4,7 @@
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+
 from tradingos.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -14,14 +15,20 @@ class Dashboard:
 
     def __init__(self, app: FastAPI):
         self.app = app
-        self.templates = Jinja2Templates(directory="templates")
+        # Use absolute path for templates (project root / templates)
+        from pathlib import Path
+        template_dir = Path(__file__).parent.parent.parent.parent.parent / "templates"
+        self.templates = Jinja2Templates(directory=str(template_dir))
         self.active_connections: set[WebSocket] = set()
         self._setup_routes()
 
     def _setup_routes(self) -> None:
         @self.app.get("/", response_class=HTMLResponse)
         async def index(request: Request):
-            return self.templates.TemplateResponse("index.html", {"request": request})
+            # Render template directly to avoid Jinja2 cache issue
+            template = self.templates.env.get_template("index.html")
+            content = template.render(request=request)
+            return HTMLResponse(content=content)
 
         @self.app.websocket("/ws")
         async def websocket_endpoint(ws: WebSocket):
