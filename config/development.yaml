@@ -9,9 +9,13 @@ logging:
 market_data:
   sources:
     polygon:
-      enabled: false  # Use mock in development
+      enabled: true
+      api_key: "lrsvxNekqx9wcWGemEuRQOgNhYe0pdZt"
     alpaca:
-      enabled: false
+      enabled: true
+      api_key: "PK67MBBUMVJZG7D4E7PULNP4BK"
+      secret_key: "H7oKA4jceDaVs4tJCWX85bXp3BFLocZcmUpaxU5Vqqud"
+      base_url: "https://paper-api.alpaca.markets/v2"
 
 scanner:
   sources:

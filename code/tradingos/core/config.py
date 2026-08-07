@@ -1,5 +1,6 @@
 """TradingOS Configuration Management."""
 
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -205,7 +206,13 @@ class Config:
     def _load_configs(self) -> None:
         """Load configuration from YAML files."""
         # Config files are at project root /config, not inside code/
-        base_path = Path(__file__).parent.parent.parent.parent / "config"
+        # In PyInstaller, use sys._MEIPASS for the temp extraction directory
+        if getattr(sys, 'frozen', False):
+            # Running in PyInstaller bundle
+            base_path = Path(sys._MEIPASS) / "config"
+        else:
+            # Running in development
+            base_path = Path(__file__).parent.parent.parent.parent / "config"
 
         # Load base config
         with open(base_path / "base.yaml") as f:
