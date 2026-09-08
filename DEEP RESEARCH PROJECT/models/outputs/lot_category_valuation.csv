@@ -1,0 +1,14 @@
+category,qty,street_new_each,sd_bear_each,sd_base_each,sd_bull_each,base_ext,30d_sell_prob,repair_risk
+Premium fridge (Bosch B36CL81ENG class),1,4799,1500,2200,2900,2200,0.25,0.3
+French-door / counter-depth fridge,5,1250,575,750,900,3750,0.6,0.22
+Side-by-side / bottom-freezer fridge,3,1150,480,625,760,1875,0.62,0.22
+Top-freezer fridge (WRTX5421TZ class),3,1079,440,560,680,1680,0.75,0.15
+Front-load washer (WF50BG8300AV class),4,999,400,525,640,2100,0.7,0.2
+Top-load washer (WA45T3200AW class),5,605,260,335,410,1675,0.78,0.16
+Electric dryer (DLE8400BE class),5,760,280,360,445,1800,0.8,0.1
+Gas dryer (DLG3401W class),4,829,295,385,470,1540,0.68,0.12
+Electric range (FLCE7522AW class),5,800,330,425,515,2125,0.72,0.14
+Gas range,2,950,380,500,610,1000,0.66,0.16
+Dishwasher,5,620,225,300,375,1500,0.58,0.24
+Over-the-range microwave,4,310,100,140,180,560,0.55,0.18
+Laundry center,1,980,380,500,620,500,0.45,0.22

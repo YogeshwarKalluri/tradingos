@@ -1,0 +1,485 @@
+{
+  "manifest_msrp": 53573.99,
+  "msrp_per_unit": 1139.8721276595745,
+  "verified_street_new_total": 43093,
+  "street_to_msrp_ratio": 0.8043642073327001,
+  "sd_ticket": {
+    "bear": 16930,
+    "base": 22305,
+    "bull": 27445
+  },
+  "sd_ticket_pct_of_msrp": {
+    "bear": 0.31601155710074985,
+    "base": 0.41634009339233463,
+    "bull": 0.5122821727483804
+  },
+  "revenue_bear": {
+    "merch": 11101.33,
+    "anc_rev": 2109.92,
+    "anc_cost": 1244.94,
+    "total": 13211.26,
+    "sellable": 40.42,
+    "salvage_units": 6.58
+  },
+  "revenue_base": {
+    "merch": 16706.76,
+    "anc_rev": 3768.37,
+    "anc_cost": 1831.21,
+    "total": 20475.13,
+    "sellable": 43.24,
+    "salvage_units": 3.76
+  },
+  "revenue_bull": {
+    "merch": 22763.71,
+    "anc_rev": 5909.82,
+    "anc_cost": 2449.56,
+    "total": 28673.52,
+    "sellable": 45.12,
+    "salvage_units": 1.88
+  },
+  "cost_lean_bear": {
+    "freight": 2100,
+    "repairs_parts": 2179.2,
+    "disposal_salvage": 394.8,
+    "payment_processing": 225.25,
+    "returns_warranty_reserve": 999.12,
+    "handling_shrinkage": 388.55,
+    "ancillary_direct_cost": 1244.94,
+    "facility_allocation": 2083,
+    "marketing": 300,
+    "payroll": 0,
+    "misc_fixed_alloc": 400,
+    "owner_labor_economic_cost": 3750
+  },
+  "contrib_before_bid_lean_bear": {
+    "with_owner_labor": -853.6,
+    "without_owner_labor": 2896.4
+  },
+  "cost_lean_base": {
+    "freight": 1750,
+    "repairs_parts": 1146.0,
+    "disposal_salvage": 225.6,
+    "payment_processing": 349.1,
+    "returns_warranty_reserve": 1002.41,
+    "handling_shrinkage": 334.14,
+    "ancillary_direct_cost": 1831.21,
+    "facility_allocation": 2083,
+    "marketing": 300,
+    "payroll": 0,
+    "misc_fixed_alloc": 400,
+    "owner_labor_economic_cost": 3750
+  },
+  "contrib_before_bid_lean_base": {
+    "with_owner_labor": 7303.67,
+    "without_owner_labor": 11053.67
+  },
+  "cost_lean_bull": {
+    "freight": 1450,
+    "repairs_parts": 514.8,
+    "disposal_salvage": 112.8,
+    "payment_processing": 488.88,
+    "returns_warranty_reserve": 910.55,
+    "handling_shrinkage": 273.16,
+    "ancillary_direct_cost": 2449.56,
+    "facility_allocation": 2083,
+    "marketing": 300,
+    "payroll": 0,
+    "misc_fixed_alloc": 400,
+    "owner_labor_economic_cost": 3750
+  },
+  "contrib_before_bid_lean_bull": {
+    "with_owner_labor": 15940.76,
+    "without_owner_labor": 19690.76
+  },
+  "cost_scaled_bear": {
+    "freight": 2100,
+    "repairs_parts": 2179.2,
+    "disposal_salvage": 394.8,
+    "payment_processing": 225.25,
+    "returns_warranty_reserve": 999.12,
+    "handling_shrinkage": 388.55,
+    "ancillary_direct_cost": 1244.94,
+    "facility_allocation": 2500,
+    "marketing": 400,
+    "payroll": 1860,
+    "misc_fixed_alloc": 600,
+    "owner_labor_economic_cost": 0
+  },
+  "contrib_before_bid_scaled_bear": {
+    "with_owner_labor": 319.4,
+    "without_owner_labor": 319.4
+  },
+  "cost_scaled_base": {
+    "freight": 1750,
+    "repairs_parts": 1146.0,
+    "disposal_salvage": 225.6,
+    "payment_processing": 349.1,
+    "returns_warranty_reserve": 1002.41,
+    "handling_shrinkage": 334.14,
+    "ancillary_direct_cost": 1831.21,
+    "facility_allocation": 2500,
+    "marketing": 400,
+    "payroll": 1860,
+    "misc_fixed_alloc": 600,
+    "owner_labor_economic_cost": 0
+  },
+  "contrib_before_bid_scaled_base": {
+    "with_owner_labor": 8476.67,
+    "without_owner_labor": 8476.67
+  },
+  "cost_scaled_bull": {
+    "freight": 1450,
+    "repairs_parts": 514.8,
+    "disposal_salvage": 112.8,
+    "payment_processing": 488.88,
+    "returns_warranty_reserve": 910.55,
+    "handling_shrinkage": 273.16,
+    "ancillary_direct_cost": 2449.56,
+    "facility_allocation": 2500,
+    "marketing": 400,
+    "payroll": 1860,
+    "misc_fixed_alloc": 600,
+    "owner_labor_economic_cost": 0
+  },
+  "contrib_before_bid_scaled_bull": {
+    "with_owner_labor": 17113.76,
+    "without_owner_labor": 17113.76
+  },
+  "max_bid_base_case": {
+    "breakeven_cash_lean(owner unpaid)": {
+      "lean": 10049.0,
+      "scaled": 7706.0
+    },
+    "breakeven_true_lean(owner paid mkt)": {
+      "lean": 6640.0,
+      "scaled": 7706.0
+    },
+    "profit_10pct_of_revenue": {
+      "lean": 4778.0,
+      "scaled": 5845.0
+    },
+    "profit_20pct_of_revenue": {
+      "lean": 2917.0,
+      "scaled": 3983.0
+    },
+    "profit_30pct_of_revenue": {
+      "lean": 1056.0,
+      "scaled": 2122.0
+    },
+    "profit_$5,000": {
+      "lean": 2094.0,
+      "scaled": 3161.0
+    },
+    "profit_$10,000": {
+      "lean": -2451.0,
+      "scaled": -1385.0
+    },
+    "profit_$15,000": {
+      "lean": -6997.0,
+      "scaled": -5930.0
+    }
+  },
+  "revenue_base_total": 20475.13,
+  "scenario_at_bid": {
+    "$3500": {
+      "lean_bear": {
+        "bid": 3500,
+        "buyer_premium": 350.0,
+        "landed_total": 5950.0,
+        "landed_per_unit": 126.6,
+        "revenue": 13211.26,
+        "profit": -4703.6
+      },
+      "lean_base": {
+        "bid": 3500,
+        "buyer_premium": 350.0,
+        "landed_total": 5600.0,
+        "landed_per_unit": 119.15,
+        "revenue": 20475.13,
+        "profit": 3453.67
+      },
+      "lean_bull": {
+        "bid": 3500,
+        "buyer_premium": 350.0,
+        "landed_total": 5300.0,
+        "landed_per_unit": 112.77,
+        "revenue": 28673.52,
+        "profit": 12090.76
+      },
+      "scaled_bear": {
+        "bid": 3500,
+        "buyer_premium": 350.0,
+        "landed_total": 5950.0,
+        "landed_per_unit": 126.6,
+        "revenue": 13211.26,
+        "profit": -3530.6
+      },
+      "scaled_base": {
+        "bid": 3500,
+        "buyer_premium": 350.0,
+        "landed_total": 5600.0,
+        "landed_per_unit": 119.15,
+        "revenue": 20475.13,
+        "profit": 4626.67
+      },
+      "scaled_bull": {
+        "bid": 3500,
+        "buyer_premium": 350.0,
+        "landed_total": 5300.0,
+        "landed_per_unit": 112.77,
+        "revenue": 28673.52,
+        "profit": 13263.76
+      }
+    },
+    "$4500": {
+      "lean_bear": {
+        "bid": 4500,
+        "buyer_premium": 450.0,
+        "landed_total": 7050.0,
+        "landed_per_unit": 150.0,
+        "revenue": 13211.26,
+        "profit": -5803.6
+      },
+      "lean_base": {
+        "bid": 4500,
+        "buyer_premium": 450.0,
+        "landed_total": 6700.0,
+        "landed_per_unit": 142.55,
+        "revenue": 20475.13,
+        "profit": 2353.67
+      },
+      "lean_bull": {
+        "bid": 4500,
+        "buyer_premium": 450.0,
+        "landed_total": 6400.0,
+        "landed_per_unit": 136.17,
+        "revenue": 28673.52,
+        "profit": 10990.76
+      },
+      "scaled_bear": {
+        "bid": 4500,
+        "buyer_premium": 450.0,
+        "landed_total": 7050.0,
+        "landed_per_unit": 150.0,
+        "revenue": 13211.26,
+        "profit": -4630.6
+      },
+      "scaled_base": {
+        "bid": 4500,
+        "buyer_premium": 450.0,
+        "landed_total": 6700.0,
+        "landed_per_unit": 142.55,
+        "revenue": 20475.13,
+        "profit": 3526.67
+      },
+      "scaled_bull": {
+        "bid": 4500,
+        "buyer_premium": 450.0,
+        "landed_total": 6400.0,
+        "landed_per_unit": 136.17,
+        "revenue": 28673.52,
+        "profit": 12163.76
+      }
+    },
+    "$6000": {
+      "lean_bear": {
+        "bid": 6000,
+        "buyer_premium": 600.0,
+        "landed_total": 8700.0,
+        "landed_per_unit": 185.11,
+        "revenue": 13211.26,
+        "profit": -7453.6
+      },
+      "lean_base": {
+        "bid": 6000,
+        "buyer_premium": 600.0,
+        "landed_total": 8350.0,
+        "landed_per_unit": 177.66,
+        "revenue": 20475.13,
+        "profit": 703.67
+      },
+      "lean_bull": {
+        "bid": 6000,
+        "buyer_premium": 600.0,
+        "landed_total": 8050.0,
+        "landed_per_unit": 171.28,
+        "revenue": 28673.52,
+        "profit": 9340.76
+      },
+      "scaled_bear": {
+        "bid": 6000,
+        "buyer_premium": 600.0,
+        "landed_total": 8700.0,
+        "landed_per_unit": 185.11,
+        "revenue": 13211.26,
+        "profit": -6280.6
+      },
+      "scaled_base": {
+        "bid": 6000,
+        "buyer_premium": 600.0,
+        "landed_total": 8350.0,
+        "landed_per_unit": 177.66,
+        "revenue": 20475.13,
+        "profit": 1876.67
+      },
+      "scaled_bull": {
+        "bid": 6000,
+        "buyer_premium": 600.0,
+        "landed_total": 8050.0,
+        "landed_per_unit": 171.28,
+        "revenue": 28673.52,
+        "profit": 10513.76
+      }
+    },
+    "$8500": {
+      "lean_bear": {
+        "bid": 8500,
+        "buyer_premium": 850.0,
+        "landed_total": 11450.0,
+        "landed_per_unit": 243.62,
+        "revenue": 13211.26,
+        "profit": -10203.6
+      },
+      "lean_base": {
+        "bid": 8500,
+        "buyer_premium": 850.0,
+        "landed_total": 11100.0,
+        "landed_per_unit": 236.17,
+        "revenue": 20475.13,
+        "profit": -2046.33
+      },
+      "lean_bull": {
+        "bid": 8500,
+        "buyer_premium": 850.0,
+        "landed_total": 10800.0,
+        "landed_per_unit": 229.79,
+        "revenue": 28673.52,
+        "profit": 6590.76
+      },
+      "scaled_bear": {
+        "bid": 8500,
+        "buyer_premium": 850.0,
+        "landed_total": 11450.0,
+        "landed_per_unit": 243.62,
+        "revenue": 13211.26,
+        "profit": -9030.6
+      },
+      "scaled_base": {
+        "bid": 8500,
+        "buyer_premium": 850.0,
+        "landed_total": 11100.0,
+        "landed_per_unit": 236.17,
+        "revenue": 20475.13,
+        "profit": -873.33
+      },
+      "scaled_bull": {
+        "bid": 8500,
+        "buyer_premium": 850.0,
+        "landed_total": 10800.0,
+        "landed_per_unit": 229.79,
+        "revenue": 28673.52,
+        "profit": 7763.76
+      }
+    },
+    "$9800": {
+      "lean_bear": {
+        "bid": 9800,
+        "buyer_premium": 980.0,
+        "landed_total": 12880.0,
+        "landed_per_unit": 274.04,
+        "revenue": 13211.26,
+        "profit": -11633.6
+      },
+      "lean_base": {
+        "bid": 9800,
+        "buyer_premium": 980.0,
+        "landed_total": 12530.0,
+        "landed_per_unit": 266.6,
+        "revenue": 20475.13,
+        "profit": -3476.33
+      },
+      "lean_bull": {
+        "bid": 9800,
+        "buyer_premium": 980.0,
+        "landed_total": 12230.0,
+        "landed_per_unit": 260.21,
+        "revenue": 28673.52,
+        "profit": 5160.76
+      },
+      "scaled_bear": {
+        "bid": 9800,
+        "buyer_premium": 980.0,
+        "landed_total": 12880.0,
+        "landed_per_unit": 274.04,
+        "revenue": 13211.26,
+        "profit": -10460.6
+      },
+      "scaled_base": {
+        "bid": 9800,
+        "buyer_premium": 980.0,
+        "landed_total": 12530.0,
+        "landed_per_unit": 266.6,
+        "revenue": 20475.13,
+        "profit": -2303.33
+      },
+      "scaled_bull": {
+        "bid": 9800,
+        "buyer_premium": 980.0,
+        "landed_total": 12230.0,
+        "landed_per_unit": 260.21,
+        "revenue": 28673.52,
+        "profit": 6333.76
+      }
+    },
+    "$11500": {
+      "lean_bear": {
+        "bid": 11500,
+        "buyer_premium": 1150.0,
+        "landed_total": 14750.0,
+        "landed_per_unit": 313.83,
+        "revenue": 13211.26,
+        "profit": -13503.6
+      },
+      "lean_base": {
+        "bid": 11500,
+        "buyer_premium": 1150.0,
+        "landed_total": 14400.0,
+        "landed_per_unit": 306.38,
+        "revenue": 20475.13,
+        "profit": -5346.33
+      },
+      "lean_bull": {
+        "bid": 11500,
+        "buyer_premium": 1150.0,
+        "landed_total": 14100.0,
+        "landed_per_unit": 300.0,
+        "revenue": 28673.52,
+        "profit": 3290.76
+      },
+      "scaled_bear": {
+        "bid": 11500,
+        "buyer_premium": 1150.0,
+        "landed_total": 14750.0,
+        "landed_per_unit": 313.83,
+        "revenue": 13211.26,
+        "profit": -12330.6
+      },
+      "scaled_base": {
+        "bid": 11500,
+        "buyer_premium": 1150.0,
+        "landed_total": 14400.0,
+        "landed_per_unit": 306.38,
+        "revenue": 20475.13,
+        "profit": -4173.33
+      },
+      "scaled_bull": {
+        "bid": 11500,
+        "buyer_premium": 1150.0,
+        "landed_total": 14100.0,
+        "landed_per_unit": 300.0,
+        "revenue": 28673.52,
+        "profit": 4463.76
+      }
+    }
+  }
+}
