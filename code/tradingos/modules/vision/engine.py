@@ -142,10 +142,12 @@ class ONNXVisionEngine(VisionEngine):
             detected_patterns = []
             for i, prob in enumerate(probs):
                 if prob >= self.confidence_threshold and i < len(PATTERN_CLASSES):
-                    detected_patterns.append({
-                        "pattern": PATTERN_CLASSES[i],
-                        "confidence": float(prob),
-                    })
+                    detected_patterns.append(
+                        {
+                            "pattern": PATTERN_CLASSES[i],
+                            "confidence": float(prob),
+                        }
+                    )
 
             # Sort by confidence
             detected_patterns.sort(key=lambda x: x["confidence"], reverse=True)

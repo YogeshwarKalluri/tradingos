@@ -6,6 +6,7 @@ from dataclasses import dataclass
 @dataclass
 class Order:
     """Order representation."""
+
     ticker: str
     side: str
     qty: int
@@ -17,6 +18,7 @@ class Order:
 @dataclass
 class Fill:
     """Fill representation."""
+
     order_id: str
     ticker: str
     side: str

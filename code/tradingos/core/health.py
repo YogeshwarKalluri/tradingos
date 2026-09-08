@@ -110,6 +110,7 @@ def create_health_app(config: HealthConfig | None = None) -> FastAPI:
 async def run_health_server(config: HealthConfig | None = None):
     """Run health server standalone."""
     import uvicorn
+
     config = config or get_config().health
     app = create_health_app(config)
     server_config = uvicorn.Config(app, host="0.0.0.0", port=config.port, log_level="warning")

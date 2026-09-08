@@ -157,8 +157,17 @@ class DuckDBStore:
         conn = self._get_conn()
         data = [
             (
-                b.ticker, b.ts, b.open, b.high, b.low, b.close,
-                b.volume, b.vwap, b.trades, b.interpolated, b.source
+                b.ticker,
+                b.ts,
+                b.open,
+                b.high,
+                b.low,
+                b.close,
+                b.volume,
+                b.vwap,
+                b.trades,
+                b.interpolated,
+                b.source,
             )
             for b in bars
         ]
@@ -182,22 +191,28 @@ class DuckDBStore:
     def get_bars_1m(self, ticker: str, start: datetime, end: datetime) -> list[dict]:
         """Get 1-minute bars for time range."""
         conn = self._get_conn()
-        return conn.execute("""
+        return conn.execute(
+            """
             SELECT ticker, ts, open, high, low, close, volume, vwap, trades, interpolated, source
             FROM ohlcv_1m
             WHERE ticker = ? AND ts >= ? AND ts <= ?
             ORDER BY ts
-        """, (ticker, start, end)).fetchall()
+        """,
+            (ticker, start, end),
+        ).fetchall()
 
     def get_latest_bar_1m(self, ticker: str) -> dict | None:
         """Get most recent 1-minute bar."""
         conn = self._get_conn()
-        row = conn.execute("""
+        row = conn.execute(
+            """
             SELECT ticker, ts, open, high, low, close, volume, vwap, trades, interpolated, source
             FROM ohlcv_1m
             WHERE ticker = ?
             ORDER BY ts DESC LIMIT 1
-        """, (ticker,)).fetchone()
+        """,
+            (ticker,),
+        ).fetchone()
         return dict(row) if row else None
 
     def get_fundamentals(self, ticker: str) -> dict | None:
@@ -224,11 +239,16 @@ class DuckDBStore:
                 avg_volume_30d=excluded.avg_volume_30d, updated_at=NOW()
             """,
             (
-                data.get("ticker"), data.get("company_name"), data.get("sector"),
-                data.get("industry"), data.get("market_cap"),
-                data.get("shares_outstanding"), data.get("float_shares"),
-                data.get("short_interest"), data.get("short_ratio"),
-                data.get("avg_volume_30d")
+                data.get("ticker"),
+                data.get("company_name"),
+                data.get("sector"),
+                data.get("industry"),
+                data.get("market_cap"),
+                data.get("shares_outstanding"),
+                data.get("float_shares"),
+                data.get("short_interest"),
+                data.get("short_ratio"),
+                data.get("avg_volume_30d"),
             ),
         )
 

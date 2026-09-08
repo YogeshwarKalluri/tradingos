@@ -175,6 +175,7 @@ def health(ctx):
     setup_logging(config.logging)
 
     import uvicorn
+
     health_app = create_health_app(config.health)
     # Also add dashboard
     create_dashboard(health_app)
@@ -219,9 +220,11 @@ Available:
 
     try:
         import IPython
+
         IPython.embed(banner1=banner, colors="Linux")
     except ImportError:
         import code
+
         code.interact(banner=banner, local=locals())
 
 

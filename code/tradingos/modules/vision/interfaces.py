@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class VisionOutput:
     """Output from vision model analysis."""
+
     patterns: list[str]
     confidence: float
     metadata: dict[str, Any]

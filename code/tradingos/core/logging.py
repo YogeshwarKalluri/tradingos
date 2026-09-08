@@ -46,6 +46,7 @@ def add_trace_id(logger: Any, method_name: str, event_dict: EventDict) -> EventD
 def add_timestamp(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
     """Add ISO timestamp to log event."""
     from datetime import datetime
+
     event_dict["timestamp"] = datetime.now(UTC).isoformat()
     return event_dict
 
@@ -77,6 +78,7 @@ def json_renderer(logger: Any, method_name: str, event_dict: EventDict) -> str:
 def console_renderer(logger: Any, method_name: str, event_dict: EventDict) -> str:
     """Render event dict for console output."""
     import structlog.dev
+
     return structlog.dev.ConsoleRenderer(colors=True)(logger, method_name, event_dict)
 
 
@@ -99,7 +101,8 @@ def setup_logging(config: LoggingConfig | None = None) -> None:
 
     # Configure structlog
     structlog.configure(
-        processors=shared_processors + [
+        processors=shared_processors
+        + [
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),
@@ -112,23 +115,29 @@ def setup_logging(config: LoggingConfig | None = None) -> None:
 
     # File handler (JSON)
     file_handler = logging.FileHandler(config.json_file)
-    file_handler.setFormatter(structlog.stdlib.ProcessorFormatter(
-        processor=json_renderer,
-        foreign_pre_chain=shared_processors,
-    ))
+    file_handler.setFormatter(
+        structlog.stdlib.ProcessorFormatter(
+            processor=json_renderer,
+            foreign_pre_chain=shared_processors,
+        )
+    )
 
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     if config.console:
-        console_handler.setFormatter(structlog.stdlib.ProcessorFormatter(
-            processor=console_renderer,
-            foreign_pre_chain=shared_processors,
-        ))
+        console_handler.setFormatter(
+            structlog.stdlib.ProcessorFormatter(
+                processor=console_renderer,
+                foreign_pre_chain=shared_processors,
+            )
+        )
     else:
-        console_handler.setFormatter(structlog.stdlib.ProcessorFormatter(
-            processor=json_renderer,
-            foreign_pre_chain=shared_processors,
-        ))
+        console_handler.setFormatter(
+            structlog.stdlib.ProcessorFormatter(
+                processor=json_renderer,
+                foreign_pre_chain=shared_processors,
+            )
+        )
 
     root_logger = logging.getLogger()
     root_logger.handlers = []

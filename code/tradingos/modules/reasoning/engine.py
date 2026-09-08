@@ -19,15 +19,18 @@ class CompositeReasoningEngine(ReasoningEngine):
         self.config = config or {}
         self.confidence_threshold = self.config.get("confidence_threshold", 0.65)
         self.min_similar_trades = self.config.get("min_similar_trades", 3)
-        self.pattern_weights = self.config.get("pattern_weights", {
-            "bull_flag": 1.2,
-            "flat_top_breakout": 1.1,
-            "vwap_reclaim": 1.15,
-            "opening_range_breakout": 1.1,
-            "double_bottom": 1.05,
-            "cup_and_handle": 1.05,
-            "no_pattern": 0.5,
-        })
+        self.pattern_weights = self.config.get(
+            "pattern_weights",
+            {
+                "bull_flag": 1.2,
+                "flat_top_breakout": 1.1,
+                "vwap_reclaim": 1.15,
+                "opening_range_breakout": 1.1,
+                "double_bottom": 1.05,
+                "cup_and_handle": 1.05,
+                "no_pattern": 0.5,
+            },
+        )
         logger.info("reasoning_engine_initialized", config=self.config)
 
     async def analyze(
@@ -67,9 +70,9 @@ class CompositeReasoningEngine(ReasoningEngine):
         }
 
         composite = (
-            weights["pattern"] * pattern_confidence * pattern_weight +
-            weights["technical"] * tech_score +
-            weights["historical"] * hist_win_rate
+            weights["pattern"] * pattern_confidence * pattern_weight
+            + weights["technical"] * tech_score
+            + weights["historical"] * hist_win_rate
         )
 
         # Normalize
@@ -102,9 +105,7 @@ class CompositeReasoningEngine(ReasoningEngine):
             )
 
         indicators_used = (
-            list(indicators.indicators.keys())
-            if indicators and indicators.indicators
-            else []
+            list(indicators.indicators.keys()) if indicators and indicators.indicators else []
         )
         thesis = TradeThesis(
             ticker=ticker,

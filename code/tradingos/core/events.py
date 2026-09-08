@@ -33,6 +33,7 @@ EventT = TypeVar("EventT", bound="Event")
 @dataclass
 class Event:
     """Base event class with metadata."""
+
     event_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     trace_id: str = field(default_factory=get_trace_id)
     timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
@@ -47,6 +48,7 @@ class Event:
 @dataclass
 class StockDetected(Event):
     """Scanner detected a new candidate."""
+
     candidate: StockCandidate = None  # Forward reference - defined in scanner module
     source: str = "scanner"
 
@@ -54,6 +56,7 @@ class StockDetected(Event):
 @dataclass
 class MarketDataReady(Event):
     """Market data enriched for candidate."""
+
     candidate: StockCandidate = None
     market_data: MarketData = None
     source: str = "market_data"
@@ -62,6 +65,7 @@ class MarketDataReady(Event):
 @dataclass
 class ChartReady(Event):
     """Chart tensor generated for candidate."""
+
     candidate: StockCandidate = None
     chart_tensor: ChartTensor = None
     source: str = "charts"
@@ -70,6 +74,7 @@ class ChartReady(Event):
 @dataclass
 class IndicatorsReady(Event):
     """Indicators calculated for candidate."""
+
     candidate: StockCandidate = None
     indicators: IndicatorSnapshot = None
     source: str = "indicators"
@@ -78,6 +83,7 @@ class IndicatorsReady(Event):
 @dataclass
 class VisionResult(Event):
     """Vision analysis complete for candidate."""
+
     candidate: StockCandidate = None
     vision_output: VisionOutput = None
     source: str = "vision"
@@ -86,6 +92,7 @@ class VisionResult(Event):
 @dataclass
 class MemoryResults(Event):
     """Similar historical trades retrieved."""
+
     candidate: StockCandidate = None
     similar_trades: list[HistoricalTrade] = field(default_factory=list)
     source: str = "memory"
@@ -94,6 +101,7 @@ class MemoryResults(Event):
 @dataclass
 class ThesisReady(Event):
     """Reasoning engine produced trade thesis."""
+
     candidate: StockCandidate = None
     thesis: TradeThesis = None
     source: str = "reasoning"
@@ -102,6 +110,7 @@ class ThesisReady(Event):
 @dataclass
 class RiskDecision(Event):
     """Risk engine decision."""
+
     candidate: StockCandidate = None
     decision: RiskDecisionResult = None
     source: str = "risk"
@@ -110,6 +119,7 @@ class RiskDecision(Event):
 @dataclass
 class OrderSubmitted(Event):
     """Order submitted to execution engine."""
+
     order: Order = None
     source: str = "execution"
 
@@ -117,6 +127,7 @@ class OrderSubmitted(Event):
 @dataclass
 class FillReceived(Event):
     """Fill received from execution."""
+
     fill: Fill = None
     source: str = "execution"
 
@@ -124,6 +135,7 @@ class FillReceived(Event):
 @dataclass
 class PipelineError(Event):
     """Pipeline stage error."""
+
     stage: str = ""
     error_type: str = ""
     error_message: str = ""
@@ -134,6 +146,7 @@ class PipelineError(Event):
 @dataclass
 class DataQualityWarning(Event):
     """Market data quality issue."""
+
     ticker: str = ""
     issue: str = ""
     severity: str = "warning"  # warning, error
@@ -182,10 +195,12 @@ class EventBus:
         self._event_counts[event_type.__name__] += 1
 
         # Log event
-        logger.debug("event_published",
-                    event_type=event_type.__name__,
-                    trace_id=event.trace_id,
-                    event_id=event.event_id)
+        logger.debug(
+            "event_published",
+            event_type=event_type.__name__,
+            trace_id=event.trace_id,
+            event_id=event.event_id,
+        )
 
         # Put in queue for workers
         if event_type in self._queues:
@@ -205,9 +220,7 @@ class EventBus:
         start = datetime.now(UTC)
 
         # Run all handlers concurrently
-        await asyncio.gather(
-            *[handler(event) for handler in handlers], return_exceptions=True
-        )
+        await asyncio.gather(*[handler(event) for handler in handlers], return_exceptions=True)
 
         elapsed = (datetime.now(UTC) - start).total_seconds() * 1000
         self._latency_sum[event_type.__name__] += elapsed
@@ -333,8 +346,7 @@ def get_event_bus() -> EventBus:
     if _event_bus is None:
         config = get_config()
         _event_bus = EventBus(
-            queue_size=config.event_bus.queue_size,
-            worker_count=config.event_bus.worker_count
+            queue_size=config.event_bus.queue_size, worker_count=config.event_bus.worker_count
         )
     return _event_bus
 

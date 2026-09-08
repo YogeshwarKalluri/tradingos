@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class TrainingSample:
     """Single training sample from historical data."""
+
     ticker: str
     timestamp: str
     features: dict[str, float]
@@ -18,6 +19,7 @@ class TrainingSample:
 @dataclass
 class TrainingConfig:
     """Configuration for training run."""
+
     model_name: str
     model_type: str  # xgboost, lightgbm, neural_net
     feature_cols: list[str]
@@ -35,6 +37,7 @@ class TrainingConfig:
 @dataclass
 class TrainingResult:
     """Result of a training run."""
+
     run_id: str
     config: TrainingConfig
     metrics: dict[str, float]

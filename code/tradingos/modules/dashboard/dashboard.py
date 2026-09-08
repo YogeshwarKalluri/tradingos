@@ -1,6 +1,5 @@
 """Dashboard module - HTMX + WebSocket real-time UI."""
 
-
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -17,6 +16,7 @@ class Dashboard:
         self.app = app
         # Use absolute path for templates (project root / templates)
         from pathlib import Path
+
         template_dir = Path(__file__).parent.parent.parent.parent.parent / "templates"
         self.templates = Jinja2Templates(directory=str(template_dir))
         self.active_connections: set[WebSocket] = set()

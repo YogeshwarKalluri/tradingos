@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class TradeThesis:
     """Reasoning output for a trade decision."""
+
     thesis: str
     confidence: float
     evidence: list[str]

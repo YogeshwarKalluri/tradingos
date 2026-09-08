@@ -108,9 +108,7 @@ class FileJournalEngine(JournalEngine):
         profit_factor = gross_profit / gross_loss if gross_loss > 0 else float("inf")
 
         # Daily P&L for Sharpe and drawdown
-        df = df.with_columns([
-            pl.col("entry_time").str.to_datetime().dt.date().alias("date")
-        ])
+        df = df.with_columns([pl.col("entry_time").str.to_datetime().dt.date().alias("date")])
         daily = df.group_by("date").agg(pl.col("pnl").sum().alias("daily_pnl"))
         daily_pnl = daily["daily_pnl"].to_list()
 
@@ -128,7 +126,7 @@ class FileJournalEngine(JournalEngine):
         if len(daily_pnl) > 1:
             mean_daily = sum(daily_pnl) / len(daily_pnl)
             std_daily = (sum((x - mean_daily) ** 2 for x in daily_pnl) / len(daily_pnl)) ** 0.5
-            sharpe = (mean_daily / std_daily * (252 ** 0.5)) if std_daily > 0 else 0.0
+            sharpe = (mean_daily / std_daily * (252**0.5)) if std_daily > 0 else 0.0
         else:
             sharpe = 0.0
 
@@ -159,21 +157,26 @@ class FileJournalEngine(JournalEngine):
             return []
 
         df = pl.DataFrame([t.__dict__ for t in self._trades])
-        df = df.with_columns([
-            pl.col("entry_time").str.to_datetime().dt.date().alias("date")
-        ])
+        df = df.with_columns([pl.col("entry_time").str.to_datetime().dt.date().alias("date")])
 
         # Filter to last N days
         cutoff = datetime.now(UTC).date()
         from datetime import timedelta
+
         cutoff = cutoff - timedelta(days=days)
         df = df.filter(pl.col("date") >= cutoff)
 
-        daily = df.group_by("date").agg([
-            pl.col("pnl").sum().alias("pnl"),
-            pl.col("trade_id").count().alias("trades"),
-            pl.col("commission").sum().alias("commission"),
-        ]).sort("date")
+        daily = (
+            df.group_by("date")
+            .agg(
+                [
+                    pl.col("pnl").sum().alias("pnl"),
+                    pl.col("trade_id").count().alias("trades"),
+                    pl.col("commission").sum().alias("commission"),
+                ]
+            )
+            .sort("date")
+        )
 
         return daily.to_dicts()
 

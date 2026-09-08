@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class IndicatorSnapshot:
     """Technical indicator values at a point in time."""
+
     ticker: str
     timestamp: str
     vwap: float | None = None

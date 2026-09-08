@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class ChartTensor:
     """Normalized chart tensor ready for vision model."""
+
     ticker: str
     timeframes: dict[str, Any]  # {timeframe: tensor}
     metadata: dict[str, Any]

@@ -50,17 +50,20 @@ class MarketDataModule:
     async def _on_bar(self, bar: OHLCV) -> None:
         """Handle incoming minute bar from Polygon."""
         # Cache latest bar
-        await self.cache.set_latest_bar(bar.ticker, {
-            "ticker": bar.ticker,
-            "ts": bar.ts,
-            "open": bar.open,
-            "high": bar.high,
-            "low": bar.low,
-            "close": bar.close,
-            "volume": bar.volume,
-            "vwap": bar.vwap,
-            "trades": bar.trades,
-        })
+        await self.cache.set_latest_bar(
+            bar.ticker,
+            {
+                "ticker": bar.ticker,
+                "ts": bar.ts,
+                "open": bar.open,
+                "high": bar.high,
+                "low": bar.low,
+                "close": bar.close,
+                "volume": bar.volume,
+                "vwap": bar.vwap,
+                "trades": bar.trades,
+            },
+        )
 
         # Store in DuckDB
         self.duckdb.insert_bars_1m([bar])

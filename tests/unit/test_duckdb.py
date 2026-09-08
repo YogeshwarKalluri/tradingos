@@ -17,6 +17,7 @@ class TestDuckDBPool:
     def temp_db(self):
         """Create a temporary database path for testing."""
         import uuid
+
         db_path = Path(tempfile.gettempdir()) / f"test_{uuid.uuid4().hex}.duckdb"
         yield db_path
         # Cleanup if file was created
@@ -26,6 +27,7 @@ class TestDuckDBPool:
     def pool(self, temp_db):
         """Create a DuckDB pool for testing."""
         from database.duckdb.connection import DuckDBConfig
+
         config = DuckDBConfig(path=temp_db, memory_limit="1GB", threads=2)
         pool = DuckDBPool(config)
         yield pool
@@ -44,8 +46,8 @@ class TestDuckDBPool:
         # Read
         result = pool.query("SELECT * FROM test ORDER BY id")
         assert len(result) == 2
-        assert result.iloc[0]['value'] == 'hello'
-        assert result.iloc[1]['value'] == 'world'
+        assert result.iloc[0]["value"] == "hello"
+        assert result.iloc[1]["value"] == "world"
 
     def test_fetchone(self, pool):
         """Test fetchone."""
@@ -54,7 +56,7 @@ class TestDuckDBPool:
 
         row = pool.fetchone("SELECT * FROM test2 WHERE id = ?", [1])
         assert row is not None
-        assert row[1] == 'single'
+        assert row[1] == "single"
 
         # Non-existent
         row = pool.fetchone("SELECT * FROM test2 WHERE id = ?", [999])
@@ -68,8 +70,8 @@ class TestDuckDBPool:
 
         rows = pool.fetchall("SELECT * FROM test3 ORDER BY id")
         assert len(rows) == 2
-        assert rows[0][1] == 'a'
-        assert rows[1][1] == 'b'
+        assert rows[0][1] == "a"
+        assert rows[1][1] == "b"
 
     def test_context_managers(self, pool):
         """Test read/write context managers."""
@@ -80,7 +82,7 @@ class TestDuckDBPool:
         with pool.read() as conn:
             result = conn.execute("SELECT * FROM test4").fetchall()
             assert len(result) == 1
-            assert result[0][1] == 'ctx'
+            assert result[0][1] == "ctx"
 
     def test_rollback_on_error(self, pool):
         """Test that rollback works on error."""
@@ -95,7 +97,7 @@ class TestDuckDBPool:
             pass
 
         # Original row should still exist
-        count = pool.query("SELECT COUNT(*) as c FROM test5").iloc[0]['c']
+        count = pool.query("SELECT COUNT(*) as c FROM test5").iloc[0]["c"]
         assert count == 1
 
     def test_polars_output(self, pool):
@@ -105,7 +107,7 @@ class TestDuckDBPool:
 
         df = pool.query_pl("SELECT * FROM test_pl")
         assert len(df) == 1
-        assert df[0, 'value'] == 'polars'
+        assert df[0, "value"] == "polars"
 
 
 class TestDuckDBGlobalPool:

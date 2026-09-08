@@ -109,6 +109,7 @@ class MLLearningEngine(LearningEngine):
             elif config.model_type == "xgboost":
                 try:
                     import xgboost as xgb
+
                     model = xgb.XGBClassifier(
                         n_estimators=config.hyperparams.get("n_estimators", 100),
                         learning_rate=config.hyperparams.get("learning_rate", 0.1),

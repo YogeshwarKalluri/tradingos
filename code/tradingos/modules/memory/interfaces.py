@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class HistoricalTrade:
     """Historical trade record for similarity search."""
+
     ticker: str
     date: str
     pattern: str

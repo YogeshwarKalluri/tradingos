@@ -14,6 +14,7 @@ logger = get_logger(__name__)
 @dataclass
 class ScannerConfig:
     """Scanner module configuration."""
+
     deduplication_window_minutes: int = 5
     priority_weights: dict[str, float] | None = None
 

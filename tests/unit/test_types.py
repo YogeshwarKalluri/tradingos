@@ -84,12 +84,7 @@ class TestTickEvent:
 
     def test_tick_event_creation(self):
         tick = TickEvent(
-            symbol="AAPL",
-            price=150.25,
-            size=100,
-            bid=150.24,
-            ask=150.26,
-            exchange="NASDAQ"
+            symbol="AAPL", price=150.25, size=100, bid=150.24, ask=150.26, exchange="NASDAQ"
         )
         assert tick.symbol == "AAPL"
         assert tick.price == 150.25
@@ -133,7 +128,7 @@ class TestStockDetectedEvent:
             change_pct=2.5,
             relative_volume=3.2,
             scanner_id="momentum_scanner",
-            filters_passed=["volume_spike", "price_momentum"]
+            filters_passed=["volume_spike", "price_momentum"],
         )
         assert event.symbol == "AAPL"
         assert event.change_pct == 2.5
@@ -188,14 +183,19 @@ class TestRiskEvents:
 
     def test_risk_approved(self):
         decision = TradeDecisionEvent(
-            symbol="AAPL", action=Action.BUY, confidence=0.8,
-            position_size=100, entry_price=150.0, stop_loss=148.0, take_profit=155.0
+            symbol="AAPL",
+            action=Action.BUY,
+            confidence=0.8,
+            position_size=100,
+            entry_price=150.0,
+            stop_loss=148.0,
+            take_profit=155.0,
         )
         event = RiskApprovedEvent(
             decision=decision,
             approved_size=100,
             risk_metrics={"portfolio_risk": 0.01, "position_risk": 0.005},
-            warnings=["High volatility"]
+            warnings=["High volatility"],
         )
         assert event.approved_size == 100
         assert event.decision == decision
@@ -204,13 +204,18 @@ class TestRiskEvents:
 
     def test_risk_rejected(self):
         decision = TradeDecisionEvent(
-            symbol="AAPL", action=Action.BUY, confidence=0.8,
-            position_size=100, entry_price=150.0, stop_loss=148.0, take_profit=155.0
+            symbol="AAPL",
+            action=Action.BUY,
+            confidence=0.8,
+            position_size=100,
+            entry_price=150.0,
+            stop_loss=148.0,
+            take_profit=155.0,
         )
         event = RiskRejectedEvent(
             decision=decision,
             reason="Exceeds max position size",
-            risk_metrics={"portfolio_risk": 0.05}
+            risk_metrics={"portfolio_risk": 0.05},
         )
         assert event.reason == "Exceeds max position size"
         assert event.event_type == EventType.RISK_REJECTED

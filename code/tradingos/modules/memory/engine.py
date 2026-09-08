@@ -120,9 +120,7 @@ class QdrantMemoryEngine(MemoryEngine):
         if filters:
             conditions = []
             for key, value in filters.items():
-                conditions.append(
-                    FieldCondition(key=key, match=MatchValue(value=value))
-                )
+                conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
             if conditions:
                 filter_obj = Filter(must=conditions)
 
@@ -215,7 +213,7 @@ class QdrantMemoryEngine(MemoryEngine):
         if len(embedding) < self.vector_size:
             embedding = np.pad(embedding, (0, self.vector_size - len(embedding)))
         else:
-            embedding = embedding[:self.vector_size]
+            embedding = embedding[: self.vector_size]
 
         # Normalize
         norm = np.linalg.norm(embedding)
@@ -255,6 +253,7 @@ class MockMemoryEngine(MemoryEngine):
     ) -> list[HistoricalTrade]:
         # Return random subset for testing
         import random
+
         return random.sample(self.trades, min(limit, len(self.trades)))
 
     async def get_stats(self) -> dict[str, Any]:

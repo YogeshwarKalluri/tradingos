@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 @dataclass
 class Position:
     """Position tracking."""
+
     ticker: str
     qty: int = 0
     avg_price: float = 0.0
@@ -168,15 +169,18 @@ class PaperExecutionEngine(ExecutionEngine):
 
             # Publish fill event
             from tradingos.core.events import publish_event
-            await publish_event(OrderFilled(
-                order_id=order.order_id,
-                fill_id=fill.fill_id,
-                ticker=order.ticker,
-                side=order.side,
-                qty=order.qty,
-                price=fill_price,
-                commission=commission,
-            ))
+
+            await publish_event(
+                OrderFilled(
+                    order_id=order.order_id,
+                    fill_id=fill.fill_id,
+                    ticker=order.ticker,
+                    side=order.side,
+                    qty=order.qty,
+                    price=fill_price,
+                    commission=commission,
+                )
+            )
 
         except asyncio.CancelledError:
             order.status = "cancelled"

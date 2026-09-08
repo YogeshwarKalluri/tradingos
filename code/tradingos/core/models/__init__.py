@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 try:
     import torch
+
     TORCH_AVAILABLE = True
 except ImportError:
     torch = None
@@ -26,6 +27,7 @@ logger = get_logger(__name__)
 @dataclass
 class ModelMetadata:
     """Static model metadata."""
+
     name: str
     version: str
     architecture: str
@@ -79,6 +81,7 @@ class BaseModel(ABC):
 @dataclass
 class ModelRegistryEntry:
     """Model registry entry with loader info."""
+
     name: str
     loader: str  # module:ClassName
     path: str
@@ -102,24 +105,26 @@ class ModelManager:
         self._running = False
 
     def register(self, entry: ModelRegistryEntry) -> None:
-            """Register a model in the registry."""
-            with self._lock:
-                self.registry[entry.name] = entry
-                vram_str = (
-                    str(entry.metadata.vram_mb)
-                    if hasattr(entry, "metadata")
-                    else "unknown"
-                )
-                logger.info(
-                    "model_registered",
-                    name=entry.name,
-                    version=entry.version,
-                    vram_mb=vram_str,
-                )
+        """Register a model in the registry."""
+        with self._lock:
+            self.registry[entry.name] = entry
+            vram_str = str(entry.metadata.vram_mb) if hasattr(entry, "metadata") else "unknown"
+            logger.info(
+                "model_registered",
+                name=entry.name,
+                version=entry.version,
+                vram_mb=vram_str,
+            )
 
-    def register_from_dict(self, name: str, loader: str, path: str,
-                          priority: int = 50, kwargs: dict | None = None,
-                          version: str = "latest") -> None:
+    def register_from_dict(
+        self,
+        name: str,
+        loader: str,
+        path: str,
+        priority: int = 50,
+        kwargs: dict | None = None,
+        version: str = "latest",
+    ) -> None:
         """Register model from parameters."""
         entry = ModelRegistryEntry(
             name=name,
@@ -127,13 +132,14 @@ class ModelManager:
             path=path,
             priority=priority,
             kwargs=kwargs or {},
-            version=version
+            version=version,
         )
         self.register(entry)
 
     def load_registry_yaml(self, path: str) -> None:
         """Load model registry from YAML file."""
         import yaml
+
         with open(path) as f:
             data = yaml.safe_load(f)
 
@@ -144,7 +150,7 @@ class ModelManager:
                 path=info["path"],
                 priority=info.get("priority", 50),
                 kwargs=info.get("kwargs", {}),
-                version=info.get("current_version", "latest")
+                version=info.get("current_version", "latest"),
             )
 
     def _import_loader(self, loader_str: str) -> type[BaseModel]:
@@ -205,8 +211,8 @@ class ModelManager:
             entry.instance = model
 
             logger.info(
-            "model_loaded", name=name, vram_used_mb=self._vram_used_mb, device=str(device)
-        )
+                "model_loaded", name=name, vram_used_mb=self._vram_used_mb, device=str(device)
+            )
             return model
 
     def unload_model(self, name: str) -> None:
@@ -242,7 +248,8 @@ class ModelManager:
         """Evict least recently used models to free VRAM."""
         # Sort by priority (lowest first), then by load time
         candidates = [
-            (name, entry) for name, entry in self.registry.items()
+            (name, entry)
+            for name, entry in self.registry.items()
             if entry.loaded and name in self._loaded_models
         ]
         candidates.sort(key=lambda x: (x[1].priority, 0))  # Priority first
@@ -326,7 +333,7 @@ class ModelManager:
                 "used_mb": self._vram_used_mb,
                 "budget_mb": self.config.vram_budget_mb,
                 "free_mb": self.config.vram_budget_mb - self._vram_used_mb,
-                "loaded_models": list(self._loaded_models.keys())
+                "loaded_models": list(self._loaded_models.keys()),
             }
 
     def get_stats(self) -> dict[str, Any]:
@@ -341,10 +348,10 @@ class ModelManager:
                         "version": entry.version,
                         "priority": entry.priority,
                         "loaded": entry.loaded,
-                        "path": entry.path
+                        "path": entry.path,
                     }
                     for name, entry in self.registry.items()
-                }
+                },
             }
 
 

@@ -1,6 +1,5 @@
 """Tests for TradingOS Model Manager."""
 
-
 import pytest
 from tradingos.core.config import ModelManagerConfig, reset_config
 from tradingos.core.models import BaseModel, ModelManager, ModelMetadata, ModelRegistryEntry
@@ -60,7 +59,7 @@ class TestModelManager:
             name="test_model",
             loader="tests.unit.test_models:MockModel",
             path="models/mock.onnx",
-            priority=50
+            priority=50,
         )
         manager.register(entry)
 
@@ -76,7 +75,7 @@ class TestModelManager:
             name="mock_model",
             loader="tests.unit.test_models:MockModel",
             path="models/mock.onnx",
-            priority=50
+            priority=50,
         )
         manager.register(entry)
 
@@ -104,13 +103,13 @@ class TestModelManager:
             name="model1",
             loader="tests.unit.test_models:MockModel",
             path="models/mock1.onnx",
-            priority=50
+            priority=50,
         )
         entry2 = ModelRegistryEntry(
             name="model2",
             loader="tests.unit.test_models:MockModel",
             path="models/mock2.onnx",
-            priority=50
+            priority=50,
         )
         manager.register(entry1)
         manager.register(entry2)
@@ -136,13 +135,13 @@ class TestModelManager:
             name="low_priority",
             loader="tests.unit.test_models:MockModel",
             path="models/low.onnx",
-            priority=10
+            priority=10,
         )
         entry_high = ModelRegistryEntry(
             name="high_priority",
             loader="tests.unit.test_models:MockModel",
             path="models/high.onnx",
-            priority=100  # Critical - never evict
+            priority=100,  # Critical - never evict
         )
         manager.register(entry_low)
         manager.register(entry_high)
@@ -166,7 +165,7 @@ class TestModelManager:
             name="test_model",
             loader="tests.unit.test_models:MockModel",
             path="models/test.onnx",
-            priority=50
+            priority=50,
         )
         manager.register(entry)
         manager.load_model("test_model")

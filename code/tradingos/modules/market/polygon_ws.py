@@ -175,10 +175,14 @@ class PolygonWebSocket(DataSource):
         """Subscribe to ticker (internal, assumes connected)."""
         if not self._ws:
             return
-        await self._ws.send(json.dumps({
-            "action": "subscribe",
-            "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "subscribe",
+                    "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
+                }
+            )
+        )
         self._subscriptions.add(ticker)
 
     async def subscribe(self, tickers: list[str]) -> None:
@@ -203,10 +207,14 @@ class PolygonWebSocket(DataSource):
         for ticker in tickers:
             if ticker not in self._subscriptions:
                 continue
-            await self._ws.send(json.dumps({
-                "action": "unsubscribe",
-                "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
-            }))
+            await self._ws.send(
+                json.dumps(
+                    {
+                        "action": "unsubscribe",
+                        "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
+                    }
+                )
+            )
             self._subscriptions.discard(ticker)
 
     async def get_bars(

@@ -71,11 +71,15 @@ class AlpacaWebSocket(DataSource):
         self._ws = await websockets.connect(url, ping_interval=20, ping_timeout=10)
 
         # Authenticate
-        await self._ws.send(json.dumps({
-            "action": "auth",
-            "key": self.api_key,
-            "secret": self.secret_key,
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "auth",
+                    "key": self.api_key,
+                    "secret": self.secret_key,
+                }
+            )
+        )
         response = await self._ws.recv()
         auth_data = json.loads(response)
         stream_ok = auth_data.get("stream") == "authentication"
@@ -123,20 +127,28 @@ class AlpacaWebSocket(DataSource):
     async def subscribe(self, tickers: list[str]) -> None:
         if not self._ws:
             return
-        await self._ws.send(json.dumps({
-            "action": "subscribe",
-            "trades": tickers,
-            "quotes": tickers,
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "subscribe",
+                    "trades": tickers,
+                    "quotes": tickers,
+                }
+            )
+        )
 
     async def unsubscribe(self, tickers: list[str]) -> None:
         if not self._ws:
             return
-        await self._ws.send(json.dumps({
-            "action": "unsubscribe",
-            "trades": tickers,
-            "quotes": tickers,
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "unsubscribe",
+                    "trades": tickers,
+                    "quotes": tickers,
+                }
+            )
+        )
 
     async def get_bars(self, ticker: str, timeframe: str, start: datetime, end: datetime) -> list:
         raise NotImplementedError

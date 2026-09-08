@@ -109,6 +109,7 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def test_publish_sync(self, bus):
         """Test synchronous publish with results."""
+
         async def handler1(event: Event):
             await asyncio.sleep(0.001)
             return "result1"
@@ -181,6 +182,7 @@ class TestEventBus:
         await bus.start()
 
         received = []
+
         async def handler(event: Event):
             received.append(event)
 
@@ -197,6 +199,7 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def test_metrics(self, bus):
         """Test metrics collection."""
+
         async def handler(event: Event):
             pass
 
@@ -331,6 +334,7 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def test_repr(self, bus):
         """Test string representation."""
+
         async def handler(event: Event):
             pass
 
@@ -363,6 +367,7 @@ class TestSubscription:
 
     def test_subscription_ordering(self):
         """Test subscription priority ordering."""
+
         async def handler(event: Event):
             pass
 

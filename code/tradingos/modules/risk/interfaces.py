@@ -7,6 +7,7 @@ from typing import Any
 @dataclass
 class RiskDecisionResult:
     """Result of risk evaluation."""
+
     approved: bool
     reason: str
     position_size: float
