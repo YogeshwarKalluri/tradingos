@@ -268,3 +268,127 @@ if hard is None:
         print(f"  Highest bid with merely POSITIVE EV for a FIRST-TIME buyer:          ${r['bid']:,} "
               f"(EV ${r['ev_first_time']:,}, worst case ${r['worst_case']:,})")
     print("  Every bid leaves a bear-case loss larger than 15% of a $20,000 bankroll.")
+
+# ---------------------------------------------------------------------------
+# 5. GRADE-CONDITIONAL ANALYSIS
+#
+# Defect risk is driven by the GRADE of the load, not by the words "scratch &
+# dent" on the listing. Wholesaler-published testing reports claim genuine
+# retailer S&D loads run ~95% "no repairs needed / 5% minor repairs", while
+# customer-return loads can be ~30% ready-to-sell with ~50% needing a part.
+#
+# CRITICAL REFINEMENT: that 95% figure is about FUNCTION, not COSMETICS. A true
+# S&D load has MORE cosmetic damage than a customer-return load -- cosmetic
+# damage is the reason the unit is in the load at all -- but far fewer
+# functional failures. So a better grade moves mass OUT of repairable/salvage
+# and INTO heavy-cosmetic; it does not turn the load into clean units. Adopting
+# the vendor's 95% as "95% sells at full price" would be a category error.
+#
+# Source caveat: these testing reports are published by wholesalers who profit
+# from selling loads. The grades below discount them accordingly.
+# ---------------------------------------------------------------------------
+GRADES = {
+ # key: (label, {bear/base/bull: (clean, heavy_cosmetic, repairable, salvage)},
+ #       repair cost per repairable unit, note)
+ "A":  ("Verified true S&D, palletised, short haul",
+        {"bear": (0.50,0.34,0.12,0.04), "base": (0.57,0.33,0.08,0.02), "bull": (0.64,0.31,0.04,0.01)},
+        135, "Manufacturer/retailer cosmetic damage. Function largely intact."),
+ "A-": ("Claimed true S&D, FLOOR-LOADED, 480 mi  <-- THIS LOT",
+        {"bear": (0.44,0.34,0.16,0.06), "base": (0.53,0.33,0.10,0.04), "bull": (0.61,0.31,0.06,0.02)},
+        150, "Same goods, but hand-stacked loose and trucked 480 mi. Transit damage."),
+ "B":  ("Grade unverified / mixed  (my original base case)",
+        {"bear": (0.42,0.28,0.16,0.14), "base": (0.55,0.25,0.12,0.08), "bull": (0.66,0.22,0.08,0.04)},
+        150, "What you must assume when the listing does not evidence the grade."),
+ "C":  ("Customer returns",
+        {"bear": (0.52,0.10,0.26,0.12), "base": (0.60,0.10,0.22,0.08), "bull": (0.68,0.09,0.18,0.05)},
+        240, "Cosmetically better (opened box), functionally far worse."),
+ "D":  ("Salvage / uninspected",
+        {"bear": (0.14,0.14,0.34,0.38), "base": (0.20,0.15,0.35,0.30), "bull": (0.28,0.16,0.34,0.22)},
+        290, "Majority defective. Parts business, not a resale business."),
+}
+
+def analyse_grade(key):
+    label, mixes, repair_cost, note = GRADES[key]
+    saved_cond = {k: v for k, v in COND.items()}
+    saved_rep  = dict(REPAIR_COST_PER_REPAIRABLE)
+    COND.update(mixes)
+    # bear/base/bull scale repair SEVERITY around the grade's central cost,
+    # in the same 1.4/1.0/0.7 ratio used in section 3. Collapsing this to a
+    # single number would silently flatter the bear case.
+    for s, k in (("bear",1.4), ("base",1.0), ("bull",0.7)):
+        REPAIR_COST_PER_REPAIRABLE[s] = round(repair_cost*k)
+    out = {"key": key, "label": label, "note": note, "repair_cost": repair_cost,
+           "mix_base": mixes["base"]}
+    for s in ("bear","base","bull"):
+        out[f"rev_{s}"] = revenue(s)["total"]
+        out[f"cbb_{s}"] = contribution_before_bid(s, "lean", True)[0]
+    # max bid at targets
+    out["bid_breakeven"] = max_bid(0, "base", "lean", True)
+    out["bid_5k"]        = max_bid(5_000, "base", "lean", True)
+    out["bid_10pct"]     = max_bid(0.10*out["rev_base"], "base", "lean", True)
+    # EV curve and hard max, same two tests as section 4
+    rows = []
+    for bid in range(1_000, 14_001, 250):
+        pn = {s: cbb - bid*1.10 for s, cbb in
+              ((s, out[f"cbb_{s}"]) for s in ("bear","base","bull"))}
+        landed = bid*1.10 + FREIGHT["base"]
+        ev1 = sum(WEIGHTS["first_time"][s]*pn[s] for s in pn)
+        ev2 = sum(WEIGHTS["experienced"][s]*pn[s] for s in pn)
+        rows.append(dict(bid=bid, landed=landed, ev_first=ev1, ev_exp=ev2, worst=pn["bear"]))
+    # Two separate questions, which section 4 wrongly ran together:
+    #   (a) Is the LOT worth bidding on?  -> EV >= 20% of landed capital.
+    #   (b) Can THIS BANKROLL absorb the bear case? -> bear loss <= 15% of it.
+    # (b) is a fact about your balance sheet, not about the lot, so it is
+    #     reported per bankroll rather than folded into a single number.
+    ev20 = [r for r in rows if r["ev_exp"] >= 0.20*r["landed"]]
+    pos1 = [r for r in rows if r["ev_first"] > 0]
+    out["bid_ev20_experienced"] = ev20[-1]["bid"] if ev20 else None
+    out["bid_positive_ev_first_timer"] = pos1[-1]["bid"] if pos1 else None
+    out["bear_loss_at_ev20_max"] = round(ev20[-1]["worst"]) if ev20 else None
+    for bankroll in (20_000, 50_000):
+        cap = -0.15*bankroll
+        ok = [r for r in ev20 if r["worst"] >= cap]
+        out[f"hard_max_bankroll_{bankroll//1000}k"] = ok[-1]["bid"] if ok else None
+    COND.clear(); COND.update(saved_cond)
+    REPAIR_COST_PER_REPAIRABLE.clear(); REPAIR_COST_PER_REPAIRABLE.update(saved_rep)
+    return out
+
+grade_rows = [analyse_grade(k) for k in GRADES]
+print("\n" + "="*118)
+print("GRADE-CONDITIONAL UNDERWRITING  (same price deck, same cost stack; only the condition mix changes)")
+print("="*118)
+print(f"{'Grade':<5}{'clean/cosm/rep/salv':>21}{'rev bear':>10}{'rev base':>10}{'rev bull':>10}"
+      f"{'EV>=20% exp':>13}{'+EV 1st-timer':>15}{'max @ $20k':>14}{'max @ $50k':>14}")
+for g in grade_rows:
+    m = g["mix_base"]; mix = f"{m[0]:.0%}/{m[1]:.0%}/{m[2]:.0%}/{m[3]:.0%}"
+    h20 = g["hard_max_bankroll_20k"]; h50 = g["hard_max_bankroll_50k"]
+    print(f"{g['key']:<5}{mix:>21}{g['rev_bear']:>10,.0f}{g['rev_base']:>10,.0f}{g['rev_bull']:>10,.0f}"
+          f"{g['bid_ev20_experienced'] or 0:>13,}{g['bid_positive_ev_first_timer'] or 0:>15,}"
+          f"{('$'+format(h20,',')) if h20 else 'DO NOT BID':>14}"
+          f"{('$'+format(h50,',')) if h50 else 'DO NOT BID':>14}")
+print("\nGrade labels:")
+for g in grade_rows:
+    print(f"  {g['key']:<3} {g['label']}")
+    print(f"      {g['note']}  Repair cost/repairable unit: ${g['repair_cost']}")
+
+with open(os.path.join(OUT,"grade_conditional_bids.csv"),"w",newline="") as f:
+    w = csv.DictWriter(f, fieldnames=[k for k in grade_rows[0] if k != "mix_base"])
+    w.writeheader()
+    for g in grade_rows: w.writerow({k: v for k, v in g.items() if k != "mix_base"})
+
+OBSERVED_CLEARING = (8_841, 11_515)
+this_lot = next(g for g in grade_rows if g["key"] == "A-")
+print(f"\nTHIS LOT is listed as 'Warehouse Damaged / Scratch & Dent', floor-loaded => Grade A- at best,")
+print(f"and the grade is CLAIMED by the seller, not evidenced. Underwrite between A- and B.")
+gB = next(g for g in grade_rows if g["key"] == "B")
+print(f"  Grade A- : bid ceiling ${this_lot['bid_ev20_experienced']:,}  "
+      f"(bear case at that bid: ${this_lot['bear_loss_at_ev20_max']:,})")
+print(f"  Grade B  : bid ceiling ${gB['bid_ev20_experienced']:,}  "
+      f"(bear case at that bid: ${gB['bear_loss_at_ev20_max']:,})")
+print(f"  On a $20,000 bankroll the bear case at those bids is "
+      f"{abs(this_lot['bear_loss_at_ev20_max'])/20_000:.0%}-{abs(gB['bear_loss_at_ev20_max'])/20_000:.0%} "
+      f"of ALL your capital on one truck => DO NOT BID at $20k.")
+print(f"  Observed market clearing for comparable lots: ${OBSERVED_CLEARING[0]:,}-${OBSERVED_CLEARING[1]:,}")
+best = this_lot["bid_ev20_experienced"] or 0
+print(f"  Even at the most favourable defensible grade, the market is bidding "
+      f"{OBSERVED_CLEARING[0]/max(best,1):.1f}x-{OBSERVED_CLEARING[1]/max(best,1):.1f}x my maximum.")

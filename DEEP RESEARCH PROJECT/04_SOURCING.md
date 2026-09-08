@@ -34,7 +34,13 @@ and whose labour is free, and if you do win it, that is the problem, not the ach
 Every successful operator in Part 2 sources through *programmes*. Auctions are how you build
 the track record that gets you a programme — treat them as tuition, and buy small.
 
-**3. Floor-loaded vs palletised.** Floor-loading means loose hand-stacking. It raises transit
+**3. Grade, which the listing will not tell you.** A verified true-S&D load and a
+customer-return load can carry identical wording. The grade ladder in Part 6 is worth roughly
+**$2,000 of bid spread** between Grade A and Grade C on a 47-unit lot — more than any
+negotiation you will win. **Ask the seller for the testing/grading report before bidding; treat
+its absence as Grade B and bid accordingly.**
+
+**4. Floor-loaded vs palletised.** Floor-loading means loose hand-stacking. It raises transit
 damage, raises unload labour, and is why my base-case salvage rate is 8% rather than 4%.
 **Given the choice at the same price, always take the palletised load.**
 

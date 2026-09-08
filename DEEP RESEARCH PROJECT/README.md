@@ -5,6 +5,8 @@
 **Verdict: NO.** Full reasoning in [`00_EXECUTIVE_SUMMARY.md`](00_EXECUTIVE_SUMMARY.md).
 
 **Verdict on the 47-unit Lowe's B-Stock lot at current market pricing: WALK AWAY.**
+Maximum bid $5,500–$6,000 depending on verified grade, against a market clearing at
+$8,841–$11,515 — and on $20,000 of capital, do not bid at all.
 See [`05_LOT_UNDERWRITING_47_UNITS.md`](05_LOT_UNDERWRITING_47_UNITS.md) and
 [`06_MAXIMUM_BID.md`](06_MAXIMUM_BID.md).
 

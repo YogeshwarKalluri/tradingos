@@ -61,15 +61,15 @@ in 24 months and about $1.05M in 36.
 
 | | Amount | Why |
 |---|---:|---|
-| First 2–3 truckloads at a disciplined price | $18,000 | ~$6,000/load landed at a $4,500 bid |
+| First 2 truckloads at a disciplined price | $15,600 | ~$7,800/load landed at a $5,500 bid (Grade B) |
 | Facility deposit + first/last (1,000–1,500 sq ft) | $4,000 | |
 | **Testing infrastructure** (240V circuits, water, drain) | $6,000 | Deferring this is how the bear case happens |
 | Dollies, hand tools, cleaning supplies, straps | $2,000 | |
 | Insurance, licences, LLC ($50 LARA), sales tax registration | $2,500 | |
 | Listing/inventory software, camera, lighting | $1,500 | |
 | **Operating reserve — 3 months of fixed cost** | $9,000 | |
-| Contingency for one bad truckload | $5,000 | The bear case is −$5,804 on a $4,500 bid |
-| **TOTAL** | **$48,000** | |
+| Contingency for one bad truckload | $7,000 | The Grade B bear case is −$6,904 at a $5,500 bid |
+| **TOTAL** | **$47,600** | |
 
 **Required starting capital: $45,000–$60,000.**
 

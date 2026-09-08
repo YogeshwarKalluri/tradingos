@@ -132,6 +132,14 @@ unit. My condition distribution for a **floor-loaded, warehouse-damaged** lot:
 | Functional fault, economic to repair | 16% | **12%** | 8% | $150 avg repair, sells at 80% |
 | Salvage / parts only | 14% | **8%** | 4% | ~$60 recovery, disposal cost |
 
+**Grade drives this more than the label does.** Wholesaler testing reports claim genuine
+retailer S&D loads run ~95% "no repairs needed / 5% minor repairs", while customer-return
+loads can be ~30% ready-to-sell with ~50% needing a part. That 95% is about **function, not
+cosmetics** — a true S&D load has *more* cosmetic damage than a customer-return load and
+*fewer* functional failures, so a better grade moves units out of repairable/salvage and into
+heavy-cosmetic, not into clean. Full grade ladder and what each is worth in bid terms:
+Part 5 Step 3b and Part 6.
+
 **[ESTIMATE]** — derived, not sourced. Floor-loading matters: units are hand-stacked loose
 rather than palletised, so transit damage is materially higher than for a palletised load.
 

@@ -129,6 +129,21 @@ before any money is committed.** They are load-bearing: the B-Stock clearing pri
 - **Scratch & Dent Appliance Warehouse** (Cedar Rapids), **Plaza Appliance Mart** (Charlotte), **K & A Appliance** (Lancaster PA, wholesaler).
 - **Discount Appliance** — non-franchise model; stores run **owner-operator, under 3,000 sq ft, no employees**.
 
+## Load grading [V, vendor-sourced — treat with caution]
+
+- Wholesaler-published testing reports (Neu Appliance Wholesale and comparable appliance
+  liquidation wholesalers) characterise genuine retailer **scratch & dent** loads as
+  **~95% "no repairs needed / 5% minor repairs"**, and **customer-return** loads as
+  **~30% ready-to-sell with ~50% needing a part**; salvage loads as majority-defective.
+- *These reports are published by firms that profit from selling loads. I have not seen an
+  audited third-party truckload defect dataset, and I do not believe one exists publicly.*
+  The grade ladder in Part 6 discounts these figures rather than adopting them, and applies
+  the correction that the 95% claim describes **function, not cosmetics** — a true S&D load
+  carries *more* cosmetic damage than a customer-return load, so a better grade shifts units
+  into the heavy-cosmetic bucket (70% of price) rather than into the clean bucket.
+- **Verify before relying on this:** ask any seller for the actual grading/testing report on
+  the specific lot. Absence of one is itself the answer — underwrite as Grade B.
+
 ## Anecdotal [A]
 
 - **QnH Liquidations** (Steven Fain, Kentucky) — started ~1 year prior; **sold 200 appliances in one month**. Press report, single source.
@@ -148,6 +163,23 @@ May is peak refrigerator season (30–40% off). Troughs: September–October and
 
 ---
 
+## Revision log
+
+**2026-09-08 — grade-conditional bidding added.** The hard maximum bid on the 47-unit lot moved
+from **$4,500 to $5,500–$6,000**. Two corrections drove it:
+
+1. **Grade folded in.** Defect risk tracks the load's grade, not the "scratch & dent" label.
+   Worth ~+$450 of base-case revenue and ~+$500 of bid headroom at Grade A- versus Grade B.
+2. **A methodological error fixed.** Part 6 had stated two acceptance tests — expected value
+   ≥ 20% of capital at risk, and bear-case loss ≤ 15% of bankroll — and then reported a single
+   number that failed the second one. These are different questions: the first is about the
+   lot, the second about your balance sheet. Separated, they now yield a bid ceiling per grade
+   and a maximum per bankroll.
+
+**The recommendation did not change.** The market clears at $8,841–$11,515 against a ceiling of
+$6,000, and on a $20,000 bankroll the answer remains: do not bid on a 47-unit out-of-state lot
+at all.
+
 ## The estimates this study depends on most
 
 Ranked by how much the conclusion would move if they are wrong:
@@ -155,9 +187,12 @@ Ranked by how much the conclusion would move if they are wrong:
 1. **[E] Metro Detroit absorbable ceiling, 630–840 units/month.** Derived from 2.1M households × 0.4 appliance purchases/household/year × 15% secondary-market share. **No primary source. The weakest number here.**
 2. **[E] Condition distribution for a floor-loaded lot (55/25/12/8).** No liquidator publishes defect rates.
 3. **[E] Scratch-and-dent realisation at 50–55% of street price.** Triangulated from the Detroit used-price floor and AOK's advertised 30–50%-off positioning.
-4. **[E] Category mix of the 47-unit lot.** Inferred from the named models plus typical Lowe's lot composition. **A real manifest replaces this entirely, and you should obtain one.**
-5. **[E] Labour standard of 99 minutes/unit.** Bottom-up task times, cross-checked only against one anecdotal report.
-6. **[E] Per-role Michigan wages.** Derived from the BLS MSA mean, not from published per-occupation Detroit figures.
+4. **[E] Grade-conditional condition mixes (Part 6).** Anchored to vendor testing claims and
+   discounted; the shape (better grade → heavy-cosmetic, not clean) is my reasoning, not a
+   sourced finding.
+5. **[E] Category mix of the 47-unit lot.** Inferred from the named models plus typical Lowe's lot composition. **A real manifest replaces this entirely, and you should obtain one.**
+6. **[E] Labour standard of 99 minutes/unit.** Bottom-up task times, cross-checked only against one anecdotal report.
+7. **[E] Per-role Michigan wages.** Derived from the BLS MSA mean, not from published per-occupation Detroit figures.
 
 **If any of these is wrong, it is more likely to make the conclusion worse than better.** The
 "no" on $1M is robust across the full Monte Carlo range of all six.

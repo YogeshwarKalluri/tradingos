@@ -4,7 +4,9 @@
 
 **1. The 47-unit Lowe's B-Stock lot at Shippensburg, PA: WALK AWAY.**
 
-My calculated hard maximum bid is **$4,500**, and **$3,000 for a first lot**. Comparable
+My calculated hard maximum bid is **$5,500–$6,000** — and **on $20,000 of capital, do not bid
+on this lot at all**, because the bear case at that bid is 33–35% of your entire bankroll on one
+truck. Comparable
 Lowe's scratch-and-dent appliance lots on B-Stock are clearing at **$188–$245 per unit**,
 which for 47 units is **$8,841–$11,515**. The market is bidding roughly **two to three times
 what this lot is worth to you.** Your proposed $8,500 bid produces an expected loss of
@@ -71,8 +73,8 @@ study, and it is fatal to a $1M-in-36-months plan.
 | # | Item | Answer |
 |---|---|---|
 | 1 | **Required starting capital** | **$45,000–$60,000** to do it properly. $20,000 works only as a garage-scale, no-showroom, owner-does-everything bootstrap, and leaves no room for one bad load. |
-| 2 | **Recommended first auction maximum bid** | **$3,000** for a first lot; **$4,500** hard maximum for an experienced operator. On this specific lot: do not bid. |
-| 3 | **Expected profit per truck** | **$2,354** base / **−$5,804** bear / **$10,991** bull, at a $4,500 bid, after charging owner labour at market. At the market clearing price of ~$9,800: **−$3,476**. |
+| 2 | **Recommended first auction maximum bid** | Grade-conditional: **$6,500** (Grade A, verified/palletised/short-haul) · **$6,000** (Grade A-, this lot) · **$5,500** (Grade B, unverified) · **$4,500** (Grade C, customer returns) · **do not bid** (Grade D). **On a $20,000 bankroll, all of these fall to $1,750–$3,500 or "do not bid" — so on $20,000, do not bid on this lot.** |
+| 3 | **Expected profit per truck** | **$2,354** base / **−$5,804** bear / **$10,991** bull, at a $4,500 bid (Grade B), after charging owner labour at market. At the market clearing price of ~$9,800: **−$3,476**. |
 | 4 | **Monthly profit at 1 truck/month** | **$3,729** before owner pay — i.e. it is a wage, not a return |
 | 5 | **Monthly profit at 3 trucks/month** | **$7,571** before owner pay |
 | 6 | **Monthly profit at 5 trucks/month** | **$1,231** — margin collapses when a second site and 4.4 paid FTE arrive |

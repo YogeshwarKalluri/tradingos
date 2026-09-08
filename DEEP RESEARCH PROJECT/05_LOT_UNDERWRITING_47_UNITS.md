@@ -86,6 +86,30 @@ haul-away 20% at $40, protection plan 15% at $129.
 
 **The honest revenue on this "$53,574 MSRP" truckload is about $20,500.**
 
+## Step 3b — Grade, and what it is worth
+
+The condition table above assumes **Grade B: grade unverified**. That is the correct
+default, because the listing *asserts* "Warehouse Damaged / Scratch & Dent" without
+evidencing it, and B-Stock's own terms allow up to 5% manifest variance and warn that
+a lot may contain non-functioning units.
+
+If the grade were verified, the mix shifts — but less than the headline vendor number
+suggests, because rescuing a unit from salvage lands it in the **heavy-cosmetic**
+bucket at 70% of price, not at full price:
+
+| Grade | What it is | Condition mix<br>clean / cosmetic / repairable / salvage | Revenue (base) | Bid ceiling<br>(EV ≥ 20% of capital) | Max on a<br>$20k bankroll | Max on a<br>$50k bankroll |
+|---|---|:--:|---:|---:|---:|---:|
+| **A** | Verified true S&D, palletised, short haul | 57 / 33 / 8 / 2 | $21,435 | **$6,500** | **$3,500** | **$6,500** |
+| **A-** **← this lot** | Claimed true S&D, FLOOR-LOADED, 480 mi | 53 / 33 / 10 / 4 | $20,928 | **$6,000** | **$2,500** | **$6,000** |
+| **B** | Grade unverified / mixed  (my original base case) | 55 / 25 / 12 / 8 | $20,475 | **$5,500** | **$1,750** | **$5,500** |
+| **C** | Customer returns | 60 / 10 / 22 / 8 | $20,977 | **$4,500** | **DO NOT BID** | **$4,250** |
+| **D** | Salvage / uninspected | 20 / 15 / 35 / 30 | $15,457 | **DO NOT BID** | **DO NOT BID** | **DO NOT BID** |
+
+**This lot is Grade A- at best** — genuine S&D goods, but floor-loaded (hand-stacked
+loose rather than palletised) and trucked 480 miles, which is why its repairable and
+salvage shares sit above Grade A's. Verifying the grade is worth about **+$450 of
+revenue and +$500 of bid headroom.** Worth doing; not worth $3,000 of bid.
+
 ## Step 4 — The full cost stack, before the bid
 
 Lean owner-operator posture (2,500 sq ft, owner does the work; owner labour charged at market
@@ -126,12 +150,13 @@ all of them are slow.** Expect to still be holding roughly a dozen of these unit
 
 ## Step 6 — Bear / base / bull for the whole truckload, at three bids
 
-Profit after every cost above, including owner labour at market rate:
+Profit after every cost above, including owner labour at market rate. **Grade B (unverified);**
+see Step 3b for the grade-conditional ceilings:
 
 | Bid | Landed (bid + 10% + freight) | $/unit landed | **Bear** | **Base** | **Bull** |
 |---:|---:|---:|---:|---:|---:|
 | $3,000 | $5,050 | $107 | -$4,154 | +$4,004 | +$12,641 |
-| $4,500 **<- my hard maximum** | $6,700 | $143 | **-$5,804** | **+$2,354** | **+$10,991** |
+| $4,500 | $6,700 | $143 | **-$5,804** | **+$2,354** | **+$10,991** |
 | $6,000 | $8,350 | $178 | -$7,454 | +$704 | +$9,341 |
 | $8,500 **<- your number** | $11,100 | $236 | -$10,204 | -$2,046 | +$6,591 |
 | $9,800 *(market clearing)* | $12,530 | $267 | -$11,634 | -$3,476 | +$5,161 |

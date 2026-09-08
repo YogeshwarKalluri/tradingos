@@ -4,9 +4,9 @@
 
 # MODIFY
 
-**Not BUY.** The 47-unit Lowe's lot at Shippensburg is a clear pass — my maximum bid of $4,500
-is roughly half the market clearing price of $8,841–$11,515, and the bear case loses money at a
-bid of zero.
+**Not BUY.** The 47-unit Lowe's lot at Shippensburg is a clear pass — my maximum bid of
+$5,500–$6,000 is well under the market clearing price of $8,841–$11,515, and on a $20,000
+bankroll the bear case at that bid is a third of all your capital on one truck.
 
 **Not WALK AWAY entirely.** The core transaction genuinely works: 60.7% gross margin, 30%
 contribution margin, 18.9% operating margin at one truck a month, break-even at 12 units. Very
@@ -19,15 +19,18 @@ exists in short-haul Michigan/Ohio sourcing that nobody appears to be exploiting
    simulated paths. Replace it with **$250,000 of cumulative operating profit in 36 months and
    a business worth $300,000–$475,000 at the end.** That is roughly a 7.8% probability at the
    profit line and a genuinely achievable plan at the peak of the profit curve.
-2. **Abandon out-of-state auction sourcing as the primary channel.** Build the Whirlpool /
+2. **Verify grade before every bid, and treat its absence as Grade B.** The grade ladder is
+   worth ~$2,000 of bid spread on a 47-unit lot (Part 6) — more than any negotiation you will
+   win. Ask for the testing report; bid Grade B when you do not get one.
+3. **Abandon out-of-state auction sourcing as the primary channel.** Build the Whirlpool /
    Ohio / regional-distributor / builder-overstock programme instead. This is worth $20–$25 per
    unit of freight — 16–20% of your entire contribution margin — and it attacks the assumption
    most likely to sink you.
-3. **Target 199 units per month and stop.** That is where operating profit peaks at
+4. **Target 199 units per month and stop.** That is where operating profit peaks at
    $10,620/month on ~$1.0M of revenue. **Do not open the second location.** Under base-case
    economics it destroys value, and the model refuses to open one because trailing profit never
    covers it.
-4. **Raise the capital or shrink the entry.** $45,000–$60,000 is the honest requirement.
+5. **Raise the capital or shrink the entry.** $45,000–$60,000 is the honest requirement.
    If $20,000 is genuinely the limit, do not buy a truckload. Buy 8–12 individual units locally
    and learn your real sell-through and defect rates on $3,000 of risk.
 
