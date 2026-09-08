@@ -105,7 +105,7 @@ jobs:
       - name: Build package
         run: |
           pip install build
-          python -m build --wheel --no-isolation
+          python -m build --wheel
 
       - name: Verify wheel
         run: |
