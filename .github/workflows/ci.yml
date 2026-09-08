@@ -25,10 +25,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e "code[dev]"
-          pip install -e "code[vision]" || true  # TensorRT may not be available
-          pip install -e "code[video]" || true
-          pip install -e "code[llm]" || true
+          pip install -e ".[dev]"
+          pip install -e ".[vision]" || true  # TensorRT may not be available
+          pip install -e ".[video]" || true
+          pip install -e ".[llm]" || true
 
       - name: Run Ruff (lint)
         run: |
@@ -57,7 +57,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e "code[dev]"
+          pip install -e ".[dev]"
 
       - name: Run unit tests
         run: |
@@ -84,7 +84,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e "code[dev]"
+          pip install -e ".[dev]"
 
       - name: Run integration tests
         run: |
@@ -105,11 +105,11 @@ jobs:
       - name: Build package
         run: |
           pip install build
-          python -m build code --wheel --no-isolation
+          python -m build --wheel --no-isolation
 
       - name: Verify wheel
         run: |
-          pip install code/dist/*.whl
+          pip install dist/*.whl
           python -c "import tradingos; print(tradingos.__version__)"
 
   dependency-audit:
@@ -130,7 +130,7 @@ jobs:
       - name: Audit dependencies
         run: |
           pip-audit -r requirements.txt || true
-          pip-audit -e "code[dev]" || true
+          pip-audit -e ".[dev]" || true
 
   docker-build:
     name: Docker Build (Optional)
