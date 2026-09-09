@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from tradingos.core.events import OrderFilled
+from tradingos.core.events import FillReceived
 from tradingos.core.logging import get_logger
 from tradingos.modules.execution.interfaces import ExecutionEngine, Fill, Order
 
@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 @dataclass
 class Position:
     """Position tracking."""
+
     ticker: str
     qty: int = 0
     avg_price: float = 0.0
@@ -33,8 +34,8 @@ class PaperExecutionEngine(ExecutionEngine):
         self,
         config: dict[str, Any] | None = None,
         account_equity: float = 100_000.0,
-        market_data=None,  # Reference to market data module for current prices
-    ):
+        market_data: Any = None,  # Reference to market data module for current prices
+    ) -> None:
         self.config = config or {}
         self.account_equity = account_equity
         self.cash = account_equity
@@ -106,6 +107,9 @@ class PaperExecutionEngine(ExecutionEngine):
 
     async def _execute_market_order(self, order: Order) -> None:
         """Execute a market order with slippage simulation."""
+        if order.order_id is None:
+            raise RuntimeError("order must be placed before it can be executed")
+
         try:
             # Get current market price
             current_price = await self._get_current_price(order.ticker)
@@ -168,15 +172,8 @@ class PaperExecutionEngine(ExecutionEngine):
 
             # Publish fill event
             from tradingos.core.events import publish_event
-            await publish_event(OrderFilled(
-                order_id=order.order_id,
-                fill_id=fill.fill_id,
-                ticker=order.ticker,
-                side=order.side,
-                qty=order.qty,
-                price=fill_price,
-                commission=commission,
-            ))
+
+            await publish_event(FillReceived(fill=fill))
 
         except asyncio.CancelledError:
             order.status = "cancelled"
@@ -192,7 +189,7 @@ class PaperExecutionEngine(ExecutionEngine):
                 # Try to get latest price from market data
                 latest = self.market_data.duckdb.get_latest_bar_1m(ticker)
                 if latest:
-                    return latest["close"]
+                    return float(latest["close"])
             except Exception:
                 pass
 
@@ -320,7 +317,7 @@ class PaperExecutionEngine(ExecutionEngine):
 def create_execution_engine(
     config: dict[str, Any] | None = None,
     account_equity: float = 100_000.0,
-    market_data=None,
+    market_data: Any = None,
 ) -> ExecutionEngine:
     """Factory function to create execution engine."""
     return PaperExecutionEngine(config, account_equity, market_data)

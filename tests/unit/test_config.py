@@ -1,6 +1,5 @@
 """Tests for TradingOS Core Configuration."""
 
-
 import pytest
 from tradingos.core.config import get_config, reset_config
 

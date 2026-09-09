@@ -1,7 +1,10 @@
 """Market Data module - coordinates all market data sources."""
 
+from __future__ import annotations
+
 import asyncio
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 from tradingos.core.config import get_config
 from tradingos.core.events import MarketDataReady, publish_event
@@ -12,19 +15,22 @@ from tradingos.modules.market.gap_detector import GapDetector
 from tradingos.modules.market.interfaces import OHLCV, MarketData
 from tradingos.modules.market.polygon_ws import PolygonWebSocket
 
+if TYPE_CHECKING:  # annotation only: importing the scanner package pulls in aiohttp
+    from tradingos.modules.scanner.interfaces import StockCandidate
+
 logger = get_logger(__name__)
 
 
 class MarketDataModule:
     """Main market data coordinator."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = get_config().market_data
         self.duckdb = DuckDBStore(self.config.duckdb_path)
         self.cache = MarketCache(default_ttl=self.config.cache_ttl_seconds)
         self.gap_detector = GapDetector(
-            max_gap_minutes=self.config.gap_detection.max_gap_minutes,
-            interpolate_small_gaps=self.config.gap_detection.interpolate_small_gaps,
+            max_gap_minutes=self.config.gap_detection.get("max_gap_minutes", 5),
+            interpolate_small_gaps=self.config.gap_detection.get("interpolate_small_gaps", True),
         )
         self.polygon_ws = PolygonWebSocket(
             on_bar=self._on_bar,
@@ -50,17 +56,20 @@ class MarketDataModule:
     async def _on_bar(self, bar: OHLCV) -> None:
         """Handle incoming minute bar from Polygon."""
         # Cache latest bar
-        await self.cache.set_latest_bar(bar.ticker, {
-            "ticker": bar.ticker,
-            "ts": bar.ts,
-            "open": bar.open,
-            "high": bar.high,
-            "low": bar.low,
-            "close": bar.close,
-            "volume": bar.volume,
-            "vwap": bar.vwap,
-            "trades": bar.trades,
-        })
+        await self.cache.set_latest_bar(
+            bar.ticker,
+            {
+                "ticker": bar.ticker,
+                "ts": bar.ts,
+                "open": bar.open,
+                "high": bar.high,
+                "low": bar.low,
+                "close": bar.close,
+                "volume": bar.volume,
+                "vwap": bar.vwap,
+                "trades": bar.trades,
+            },
+        )
 
         # Store in DuckDB
         self.duckdb.insert_bars_1m([bar])
@@ -102,7 +111,7 @@ class MarketDataModule:
                     ):
                         pass
 
-    async def enrich_candidate(self, candidate) -> None:
+    async def enrich_candidate(self, candidate: StockCandidate) -> None:
         """Enrich a stock candidate with market data."""
         ticker = candidate.ticker
 

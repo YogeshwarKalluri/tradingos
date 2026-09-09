@@ -8,6 +8,7 @@ from typing import Any
 @dataclass
 class OHLCV:
     """Single OHLCV bar."""
+
     ticker: str
     ts: datetime
     open: float
@@ -24,6 +25,7 @@ class OHLCV:
 @dataclass
 class MarketData:
     """Aggregated market data for a candidate."""
+
     ticker: str
     bars_1m: list
     bars_5m: list

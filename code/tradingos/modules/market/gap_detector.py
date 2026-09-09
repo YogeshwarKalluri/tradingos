@@ -32,12 +32,14 @@ class GapDetector:
 
             if curr_ts > expected_ts:
                 gap_minutes = (curr_ts - expected_ts).total_seconds() / 60
-                gaps.append({
-                    "gap_start": expected_ts,
-                    "gap_end": curr_ts,
-                    "gap_minutes": gap_minutes,
-                    "missing_bars": int(gap_minutes / expected_interval.total_seconds() * 60),
-                })
+                gaps.append(
+                    {
+                        "gap_start": expected_ts,
+                        "gap_end": curr_ts,
+                        "gap_minutes": gap_minutes,
+                        "missing_bars": int(gap_minutes / expected_interval.total_seconds() * 60),
+                    }
+                )
 
         return gaps
 

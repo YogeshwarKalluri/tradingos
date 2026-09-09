@@ -4,12 +4,13 @@ import asyncio
 import signal
 
 import click
+from fastapi import FastAPI
 
-from tradingos.core.config import get_config, reset_config
-from tradingos.core.events import get_event_bus
+from tradingos.core.config import Config, get_config, reset_config
+from tradingos.core.events import EventBus, get_event_bus
 from tradingos.core.health import create_health_app
 from tradingos.core.logging import get_logger, setup_logging
-from tradingos.core.models import get_model_manager
+from tradingos.core.models import ModelManager, get_model_manager
 from tradingos.modules.dashboard import create_dashboard
 
 logger = get_logger(__name__)
@@ -20,14 +21,15 @@ class TradingOS:
 
     def __init__(self, env: str = "development"):
         self.env = env
-        self.config = None
-        self.event_bus = None
-        self.model_manager = None
-        self.health_server = None
+        # Populated by initialize(); None until then.
+        self.config: Config | None = None
+        self.event_bus: EventBus | None = None
+        self.model_manager: ModelManager | None = None
+        self.health_server: FastAPI | None = None
         self._running = False
         self._shutdown_event = asyncio.Event()
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize all components."""
         # Reset config for new environment
         reset_config()
@@ -53,9 +55,12 @@ class TradingOS:
 
         logger.info("tradingos_initialized")
 
-    async def start_market_hours(self):
+    async def start_market_hours(self) -> None:
         """Start for market hours operation."""
         logger.info("starting_market_hours_mode")
+
+        if self.model_manager is None:
+            raise RuntimeError("initialize() must be called first")
 
         # Load market hours models
         await self.model_manager.load_market_hours_models()
@@ -66,9 +71,12 @@ class TradingOS:
         self._running = True
         logger.info("market_hours_ready")
 
-    async def start_after_hours(self):
+    async def start_after_hours(self) -> None:
         """Start for after-hours operation."""
         logger.info("starting_after_hours_mode")
+
+        if self.model_manager is None:
+            raise RuntimeError("initialize() must be called first")
 
         # Load after-hours models
         await self.model_manager.load_after_hours_models()
@@ -76,7 +84,7 @@ class TradingOS:
         self._running = True
         logger.info("after_hours_ready")
 
-    async def run(self):
+    async def run(self) -> None:
         """Run the main application loop."""
         if not self._running:
             raise RuntimeError("Must call start_market_hours() or start_after_hours() first")
@@ -88,7 +96,7 @@ class TradingOS:
 
         logger.info("tradingos_shutdown_requested")
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         """Graceful shutdown."""
         logger.info("tradingos_shutting_down")
         self._running = False
@@ -108,7 +116,7 @@ class TradingOS:
         self._shutdown_event.set()
         logger.info("tradingos_shutdown_complete")
 
-    def signal_shutdown(self):
+    def signal_shutdown(self) -> None:
         """Signal shutdown from signal handler."""
         self._shutdown_event.set()
 
@@ -116,7 +124,7 @@ class TradingOS:
 @click.group()
 @click.option("--env", default="development", help="Environment (development/production)")
 @click.pass_context
-def cli(ctx, env):
+def cli(ctx: click.Context, env: str) -> None:
     """TradingOS - Local AI-Powered Momentum Day Trading Platform."""
     ctx.ensure_object(dict)
     ctx.obj["env"] = env
@@ -124,12 +132,12 @@ def cli(ctx, env):
 
 @cli.command()
 @click.pass_context
-def start(ctx):
+def start(ctx: click.Context) -> None:
     """Start TradingOS in market hours mode."""
     env = ctx.obj["env"]
     app = TradingOS(env)
 
-    async def run():
+    async def run() -> None:
         await app.initialize()
         await app.start_market_hours()
 
@@ -146,12 +154,12 @@ def start(ctx):
 
 @cli.command()
 @click.pass_context
-def after_hours(ctx):
+def after_hours(ctx: click.Context) -> None:
     """Start TradingOS in after-hours mode (video processing, evaluation)."""
     env = ctx.obj["env"]
     app = TradingOS(env)
 
-    async def run():
+    async def run() -> None:
         await app.initialize()
         await app.start_after_hours()
 
@@ -167,7 +175,7 @@ def after_hours(ctx):
 
 @cli.command()
 @click.pass_context
-def health(ctx):
+def health(ctx: click.Context) -> None:
     """Run health check server only."""
     env = ctx.obj["env"]
     reset_config()
@@ -175,6 +183,7 @@ def health(ctx):
     setup_logging(config.logging)
 
     import uvicorn
+
     health_app = create_health_app(config.health)
     # Also add dashboard
     create_dashboard(health_app)
@@ -183,7 +192,7 @@ def health(ctx):
 
 @cli.command()
 @click.pass_context
-def migrate(ctx):
+def migrate(ctx: click.Context) -> None:
     """Run database migrations."""
     env = ctx.obj["env"]
     reset_config()
@@ -197,7 +206,7 @@ def migrate(ctx):
 
 @cli.command()
 @click.pass_context
-def shell(ctx):
+def shell(ctx: click.Context) -> None:
     """Start interactive shell with app context."""
     env = ctx.obj["env"]
     reset_config()
@@ -219,15 +228,17 @@ Available:
 
     try:
         import IPython
+
         IPython.embed(banner1=banner, colors="Linux")
     except ImportError:
         import code
+
         code.interact(banner=banner, local=locals())
 
 
 @cli.command()
 @click.pass_context
-def version(ctx):
+def version(ctx: click.Context) -> None:
     """Show version."""
     env = ctx.obj["env"]
     reset_config()

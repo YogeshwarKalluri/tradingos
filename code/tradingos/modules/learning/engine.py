@@ -109,6 +109,7 @@ class MLLearningEngine(LearningEngine):
             elif config.model_type == "xgboost":
                 try:
                     import xgboost as xgb
+
                     model = xgb.XGBClassifier(
                         n_estimators=config.hyperparams.get("n_estimators", 100),
                         learning_rate=config.hyperparams.get("learning_rate", 0.1),
@@ -159,14 +160,14 @@ class MLLearningEngine(LearningEngine):
         except Exception as e:
             result.status = "failed"
             result.completed_at = datetime.now(UTC).isoformat()
-            result.metrics = {"error": str(e)}
+            result.error = str(e)
             self._save_history()
             logger.error("training_failed", run_id=run_id, error=str(e))
             raise
 
         return result
 
-    async def evaluate(self, model_path: str, test_data) -> dict[str, float]:
+    async def evaluate(self, model_path: str, test_data: Any) -> dict[str, float]:
         """Evaluate a trained model on test data."""
         model = joblib.load(model_path)
         X_test, y_test = test_data

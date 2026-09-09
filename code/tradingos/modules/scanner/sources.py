@@ -2,8 +2,9 @@ import asyncio
 import contextlib
 import json
 import os
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from pathlib import Path
+from typing import Any
 
 from aiohttp import web
 from watchfiles import watch
@@ -21,7 +22,7 @@ class FileWatchSource(ScannerSource):
         self,
         path: str,
         pattern: str = "*.jsonl",
-        callback: Callable[[list[StockCandidate]], None] | None = None,
+        callback: Callable[[list[StockCandidate]], Awaitable[None]] | None = None,
     ):
         self.path = Path(path)
         self.pattern = pattern
@@ -94,14 +95,14 @@ class WebhookSource(ScannerSource):
         host: str = "0.0.0.0",
         port: int = 8081,
         path: str = "/scanner/candidates",
-        callback: Callable[[list[StockCandidate]], None] | None = None,
+        callback: Callable[[list[StockCandidate]], Awaitable[None]] | None = None,
     ):
         self.host = host
         self.port = port
         self.path = path
         self.callback = callback
-        self._app = None
-        self._server = None
+        self._app: web.Application | None = None
+        self._server: Any = None
 
     async def start(self) -> None:
         """Start the webhook server."""
@@ -116,7 +117,7 @@ class WebhookSource(ScannerSource):
         self._runner = runner
         logger.info("webhook_started", host=self.host, port=self.port, path=self.path)
 
-    async def _handle_post(self, request) -> web.Response:
+    async def _handle_post(self, request: web.Request) -> web.Response:
         """Handle incoming webhook POST."""
         try:
             data = await request.json()
@@ -150,7 +151,7 @@ class IPCSource(ScannerSource):
     def __init__(
         self,
         pipe_path: str,
-        callback: Callable[[list[StockCandidate]], None] | None = None,
+        callback: Callable[[list[StockCandidate]], Awaitable[None]] | None = None,
     ):
         self.pipe_path = pipe_path
         self.callback = callback
@@ -186,16 +187,19 @@ class IPCSource(ScannerSource):
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
 
-        # Connect to FIFO
-        async with open(self.pipe_path) as f:
-            transport, _ = await loop.connect_read_pipe(lambda: protocol, f)
+        # Connect to FIFO. open() returns a synchronous file object, so this
+        # cannot be an `async with`; and the pipe must stay open for the
+        # lifetime of the transport, which takes ownership and closes it in the
+        # finally below.
+        pipe = open(self.pipe_path)  # noqa: SIM115
+        transport, _ = await loop.connect_read_pipe(lambda: protocol, pipe)
 
         try:
             while self._running:
-                line = await reader.readline()
-                if not line:
+                raw = await reader.readline()
+                if not raw:
                     break
-                line = line.decode().strip()
+                line = raw.decode().strip()
                 if not line:
                     continue
 

@@ -3,6 +3,7 @@
 import threading
 from datetime import datetime
 from pathlib import Path
+from typing import Any, cast
 
 import duckdb
 
@@ -26,7 +27,8 @@ class DuckDBStore:
         if not hasattr(self._local, "conn"):
             self._local.conn = duckdb.connect(str(self.db_path))
             self._local.conn.execute("PRAGMA threads=4")
-        return self._local.conn
+        # threading.local attributes are untyped by construction.
+        return cast(duckdb.DuckDBPyConnection, self._local.conn)
 
     def _init_schema(self) -> None:
         """Initialize database schema with partitioned tables."""
@@ -157,8 +159,17 @@ class DuckDBStore:
         conn = self._get_conn()
         data = [
             (
-                b.ticker, b.ts, b.open, b.high, b.low, b.close,
-                b.volume, b.vwap, b.trades, b.interpolated, b.source
+                b.ticker,
+                b.ts,
+                b.open,
+                b.high,
+                b.low,
+                b.close,
+                b.volume,
+                b.vwap,
+                b.trades,
+                b.interpolated,
+                b.source,
             )
             for b in bars
         ]
@@ -179,32 +190,59 @@ class DuckDBStore:
 
         return len(bars)
 
+    @staticmethod
+    def _rows_to_dicts(result: Any) -> list[dict]:
+        """Convert a duckdb result to dicts.
+
+        duckdb returns plain tuples, so ``dict(row)`` raises ValueError; the
+        column names have to come from the cursor description.
+        """
+        columns = [d[0] for d in result.description]
+        return [dict(zip(columns, row, strict=True)) for row in result.fetchall()]
+
+    @staticmethod
+    def _row_to_dict(result: Any) -> dict | None:
+        """Convert the first row of a duckdb result to a dict, or None."""
+        columns = [d[0] for d in result.description]
+        row = result.fetchone()
+        return dict(zip(columns, row, strict=True)) if row else None
+
     def get_bars_1m(self, ticker: str, start: datetime, end: datetime) -> list[dict]:
         """Get 1-minute bars for time range."""
         conn = self._get_conn()
-        return conn.execute("""
+        return self._rows_to_dicts(
+            conn.execute(
+                """
             SELECT ticker, ts, open, high, low, close, volume, vwap, trades, interpolated, source
             FROM ohlcv_1m
             WHERE ticker = ? AND ts >= ? AND ts <= ?
             ORDER BY ts
-        """, (ticker, start, end)).fetchall()
+        """,
+                (ticker, start, end),
+            )
+        )
 
     def get_latest_bar_1m(self, ticker: str) -> dict | None:
         """Get most recent 1-minute bar."""
         conn = self._get_conn()
-        row = conn.execute("""
+        return self._row_to_dict(
+            conn.execute(
+                """
             SELECT ticker, ts, open, high, low, close, volume, vwap, trades, interpolated, source
             FROM ohlcv_1m
             WHERE ticker = ?
             ORDER BY ts DESC LIMIT 1
-        """, (ticker,)).fetchone()
-        return dict(row) if row else None
+        """,
+                (ticker,),
+            )
+        )
 
     def get_fundamentals(self, ticker: str) -> dict | None:
         """Get fundamental data for ticker."""
         conn = self._get_conn()
-        row = conn.execute("SELECT * FROM fundamentals WHERE ticker = ?", (ticker,)).fetchone()
-        return dict(row) if row else None
+        return self._row_to_dict(
+            conn.execute("SELECT * FROM fundamentals WHERE ticker = ?", (ticker,))
+        )
 
     def upsert_fundamentals(self, data: dict) -> None:
         """Insert or update fundamental data."""
@@ -224,11 +262,16 @@ class DuckDBStore:
                 avg_volume_30d=excluded.avg_volume_30d, updated_at=NOW()
             """,
             (
-                data.get("ticker"), data.get("company_name"), data.get("sector"),
-                data.get("industry"), data.get("market_cap"),
-                data.get("shares_outstanding"), data.get("float_shares"),
-                data.get("short_interest"), data.get("short_ratio"),
-                data.get("avg_volume_30d")
+                data.get("ticker"),
+                data.get("company_name"),
+                data.get("sector"),
+                data.get("industry"),
+                data.get("market_cap"),
+                data.get("shares_outstanding"),
+                data.get("float_shares"),
+                data.get("short_interest"),
+                data.get("short_ratio"),
+                data.get("avg_volume_30d"),
             ),
         )
 

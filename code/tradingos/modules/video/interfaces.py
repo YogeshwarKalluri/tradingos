@@ -1,26 +1,24 @@
 """Video Pipeline interfaces - Ross Cameron content automation."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
 @dataclass
 class VideoSource:
     """Source video configuration."""
+
     platform: str  # youtube, local
     channel_id: str | None = None
     video_id: str | None = None
     local_path: str | None = None
-    keywords: list[str] = None
-
-    def __post_init__(self):
-        if self.keywords is None:
-            self.keywords = []
+    keywords: list[str] = field(default_factory=list)
 
 
 @dataclass
 class ExtractedContent:
     """Content extracted from video."""
+
     video_id: str
     title: str
     transcript: str
@@ -34,6 +32,7 @@ class ExtractedContent:
 @dataclass
 class VideoPipelineConfig:
     """Configuration for video pipeline."""
+
     sources: list[VideoSource]
     output_dir: str = "data/video"
     whisper_model: str = "base"  # tiny, base, small, medium, large

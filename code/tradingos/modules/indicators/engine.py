@@ -16,7 +16,7 @@ def _sma(values: np.ndarray, period: int) -> np.ndarray:
     """Simple Moving Average."""
     result = np.full_like(values, np.nan)
     for i in range(period - 1, len(values)):
-        result[i] = np.mean(values[i - period + 1:i + 1])
+        result[i] = np.mean(values[i - period + 1 : i + 1])
     return result
 
 
@@ -58,15 +58,11 @@ def _atr(highs: np.ndarray, lows: np.ndarray, closes: np.ndarray, period: int = 
     tr = np.zeros_like(closes)
 
     for i in range(1, len(closes)):
-        tr[i] = max(
-            highs[i] - lows[i],
-            abs(highs[i] - closes[i - 1]),
-            abs(lows[i] - closes[i - 1])
-        )
+        tr[i] = max(highs[i] - lows[i], abs(highs[i] - closes[i - 1]), abs(lows[i] - closes[i - 1]))
 
     for i in range(period, len(closes)):
         if i == period:
-            result[i] = np.mean(tr[1:period + 1])
+            result[i] = np.mean(tr[1 : period + 1])
         else:
             result[i] = (result[i - 1] * (period - 1) + tr[i]) / period
 
@@ -111,8 +107,8 @@ def _rsi(closes: np.ndarray, period: int = 14) -> np.ndarray:
         else:
             losses[i] = -diff
 
-    avg_gain = np.mean(gains[1:period + 1])
-    avg_loss = np.mean(losses[1:period + 1])
+    avg_gain = np.mean(gains[1 : period + 1])
+    avg_loss = np.mean(losses[1 : period + 1])
 
     if avg_loss == 0:
         result[period] = 100.0
@@ -200,9 +196,7 @@ class VectorizedIndicatorEngine(IndicatorEngine):
             indicators[f"ema_{period}"] = emas.get(f"ema_{period}")
         indicators["rsi"] = rsi
         indicators["atr_pct"] = (
-            atr / closes[latest_idx] * 100
-            if atr and closes[latest_idx] > 0
-            else None
+            atr / closes[latest_idx] * 100 if atr and closes[latest_idx] > 0 else None
         )
 
         return IndicatorSnapshot(

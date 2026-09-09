@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any
 
 import websockets
+from websockets.client import WebSocketClientProtocol
 
 from tradingos.core.logging import get_logger
 from tradingos.modules.market.interfaces import OHLCV, DataSource
@@ -31,10 +32,10 @@ class AlpacaWebSocket(DataSource):
         self.on_trade = on_trade
         self.on_quote = on_quote
 
-        self._ws = None
+        self._ws: WebSocketClientProtocol | None = None
         self._running = False
-        self._task = None
-        self._subscriptions = set()
+        self._task: asyncio.Task | None = None
+        self._subscriptions: set[str] = set()
 
     async def start(self) -> None:
         """Start WebSocket connection."""
@@ -71,11 +72,15 @@ class AlpacaWebSocket(DataSource):
         self._ws = await websockets.connect(url, ping_interval=20, ping_timeout=10)
 
         # Authenticate
-        await self._ws.send(json.dumps({
-            "action": "auth",
-            "key": self.api_key,
-            "secret": self.secret_key,
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "auth",
+                    "key": self.api_key,
+                    "secret": self.secret_key,
+                }
+            )
+        )
         response = await self._ws.recv()
         auth_data = json.loads(response)
         stream_ok = auth_data.get("stream") == "authentication"
@@ -86,6 +91,9 @@ class AlpacaWebSocket(DataSource):
         logger.info("alpaca_ws_connected")
 
     async def _listen(self) -> None:
+        if self._ws is None:
+            raise RuntimeError("_listen() called before the socket was connected")
+
         async for message in self._ws:
             if not self._running:
                 break
@@ -103,7 +111,7 @@ class AlpacaWebSocket(DataSource):
                     "ticker": msg.get("S"),
                     "price": msg.get("p"),
                     "size": msg.get("s"),
-                    "timestamp": datetime.fromisoformat(msg.get("t").replace("Z", "+00:00")),
+                    "timestamp": datetime.fromisoformat(msg.get("t", "").replace("Z", "+00:00")),
                 }
                 # Note: Alpaca doesn't send minute bars directly via WS
                 if self.on_trade:
@@ -115,7 +123,7 @@ class AlpacaWebSocket(DataSource):
                     "bid_size": msg.get("bs"),
                     "ask_price": msg.get("ap"),
                     "ask_size": msg.get("as"),
-                    "timestamp": datetime.fromisoformat(msg.get("t").replace("Z", "+00:00")),
+                    "timestamp": datetime.fromisoformat(msg.get("t", "").replace("Z", "+00:00")),
                 }
                 if self.on_quote:
                     await self.on_quote(quote)
@@ -123,20 +131,28 @@ class AlpacaWebSocket(DataSource):
     async def subscribe(self, tickers: list[str]) -> None:
         if not self._ws:
             return
-        await self._ws.send(json.dumps({
-            "action": "subscribe",
-            "trades": tickers,
-            "quotes": tickers,
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "subscribe",
+                    "trades": tickers,
+                    "quotes": tickers,
+                }
+            )
+        )
 
     async def unsubscribe(self, tickers: list[str]) -> None:
         if not self._ws:
             return
-        await self._ws.send(json.dumps({
-            "action": "unsubscribe",
-            "trades": tickers,
-            "quotes": tickers,
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "unsubscribe",
+                    "trades": tickers,
+                    "quotes": tickers,
+                }
+            )
+        )
 
     async def get_bars(self, ticker: str, timeframe: str, start: datetime, end: datetime) -> list:
         raise NotImplementedError

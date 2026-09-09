@@ -52,7 +52,7 @@ class ONNXVisionEngine(VisionEngine):
         self.confidence_threshold = confidence_threshold
         self.nms_iou_threshold = nms_iou_threshold
         self.use_tensorrt = use_tensorrt
-        self.session = None
+        self.session: Any = None
         self._load_model()
 
     def _load_model(self) -> None:
@@ -139,13 +139,15 @@ class ONNXVisionEngine(VisionEngine):
             probs = self._softmax(logits)
 
             # Get top predictions above threshold
-            detected_patterns = []
+            detected_patterns: list[dict[str, Any]] = []
             for i, prob in enumerate(probs):
                 if prob >= self.confidence_threshold and i < len(PATTERN_CLASSES):
-                    detected_patterns.append({
-                        "pattern": PATTERN_CLASSES[i],
-                        "confidence": float(prob),
-                    })
+                    detected_patterns.append(
+                        {
+                            "pattern": PATTERN_CLASSES[i],
+                            "confidence": float(prob),
+                        }
+                    )
 
             # Sort by confidence
             detected_patterns.sort(key=lambda x: x["confidence"], reverse=True)
@@ -173,13 +175,14 @@ class ONNXVisionEngine(VisionEngine):
     def _softmax(x: np.ndarray) -> np.ndarray:
         """Numerically stable softmax."""
         exp_x = np.exp(x - np.max(x))
-        return exp_x / exp_x.sum()
+        result: np.ndarray = exp_x / exp_x.sum()
+        return result
 
 
 class MockVisionEngine(VisionEngine):
     """Mock vision engine for development/testing."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         self.patterns = ["bull_flag", "vwap_reclaim", "opening_range_breakout"]
         logger.info("mock_vision_engine_initialized")
 
@@ -198,7 +201,7 @@ class MockVisionEngine(VisionEngine):
         )
 
 
-def create_vision_engine(use_mock: bool = True, **kwargs) -> VisionEngine:
+def create_vision_engine(use_mock: bool = True, **kwargs: Any) -> VisionEngine:
     """Factory function to create vision engine."""
     if use_mock:
         return MockVisionEngine(**kwargs)

@@ -1,17 +1,27 @@
-"""Reasoning Engine interfaces - stub for forward references."""
+"""Reasoning Engine interfaces."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
 
 
 @dataclass
 class TradeThesis:
     """Reasoning output for a trade decision."""
-    thesis: str
+
+    ticker: str
+    direction: str
     confidence: float
-    evidence: list[str]
-    risk_factors: list[str]
-    metadata: dict[str, Any]
+    entry_price: float
+    stop_loss: float
+    target_price: float
+    position_size_pct: float
+    pattern: str
+    reasoning: str
+    similar_trades_count: int
+    historical_win_rate: float
+    indicators_used: list[str] = field(default_factory=list)
+    timestamp: datetime | None = None
 
 
 class ReasoningEngine:

@@ -1,5 +1,6 @@
 """Dashboard module - HTMX + WebSocket real-time UI."""
 
+from typing import Any
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -17,6 +18,7 @@ class Dashboard:
         self.app = app
         # Use absolute path for templates (project root / templates)
         from pathlib import Path
+
         template_dir = Path(__file__).parent.parent.parent.parent.parent / "templates"
         self.templates = Jinja2Templates(directory=str(template_dir))
         self.active_connections: set[WebSocket] = set()
@@ -24,14 +26,14 @@ class Dashboard:
 
     def _setup_routes(self) -> None:
         @self.app.get("/", response_class=HTMLResponse)
-        async def index(request: Request):
+        async def index(request: Request) -> HTMLResponse:
             # Render template directly to avoid Jinja2 cache issue
             template = self.templates.env.get_template("index.html")
             content = template.render(request=request)
             return HTMLResponse(content=content)
 
         @self.app.websocket("/ws")
-        async def websocket_endpoint(ws: WebSocket):
+        async def websocket_endpoint(ws: WebSocket) -> None:
             await ws.accept()
             self.active_connections.add(ws)
             try:
@@ -41,7 +43,7 @@ class Dashboard:
                 self.active_connections.discard(ws)
 
         @self.app.get("/health")
-        async def health():
+        async def health() -> dict[str, Any]:
             return {"status": "ok", "connections": len(self.active_connections)}
 
     async def broadcast(self, event: dict) -> None:

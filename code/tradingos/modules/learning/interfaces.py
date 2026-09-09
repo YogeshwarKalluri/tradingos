@@ -1,12 +1,13 @@
 """Learning Engine interfaces - After-hours model training pipeline."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
 @dataclass
 class TrainingSample:
     """Single training sample from historical data."""
+
     ticker: str
     timestamp: str
     features: dict[str, float]
@@ -18,6 +19,7 @@ class TrainingSample:
 @dataclass
 class TrainingConfig:
     """Configuration for training run."""
+
     model_name: str
     model_type: str  # xgboost, lightgbm, neural_net
     feature_cols: list[str]
@@ -25,16 +27,13 @@ class TrainingConfig:
     train_start: str | None = None
     train_end: str | None = None
     validation_split: float = 0.2
-    hyperparams: dict[str, Any] = None
-
-    def __post_init__(self):
-        if self.hyperparams is None:
-            self.hyperparams = {}
+    hyperparams: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class TrainingResult:
     """Result of a training run."""
+
     run_id: str
     config: TrainingConfig
     metrics: dict[str, float]
@@ -42,6 +41,7 @@ class TrainingResult:
     started_at: str
     completed_at: str | None = None
     status: str = "running"  # running, completed, failed
+    error: str | None = None
 
 
 class LearningEngine:
@@ -50,7 +50,7 @@ class LearningEngine:
     async def train(self, config: TrainingConfig) -> TrainingResult:
         raise NotImplementedError
 
-    async def evaluate(self, model_path: str, test_data) -> dict[str, float]:
+    async def evaluate(self, model_path: str, test_data: Any) -> dict[str, float]:
         raise NotImplementedError
 
     async def get_training_history(self) -> list[TrainingResult]:

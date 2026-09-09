@@ -11,6 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class AppConfig(BaseSettings):
     """Application configuration."""
+
     name: str = "TradingOS"
     version: str = "0.1.0"
     timezone: str = "America/New_York"
@@ -21,6 +22,7 @@ class AppConfig(BaseSettings):
 
 class MarketHoursConfig(BaseSettings):
     """Market hours configuration."""
+
     pre_market_start: str = "08:30"
     market_open: str = "09:30"
     market_close: str = "16:00"
@@ -32,6 +34,7 @@ class MarketHoursConfig(BaseSettings):
 
 class EventBusConfig(BaseSettings):
     """Event bus configuration."""
+
     queue_size: int = 10000
     worker_count: int = 4
     batch_timeout_ms: int = 10
@@ -41,6 +44,7 @@ class EventBusConfig(BaseSettings):
 
 class ModelManagerConfig(BaseSettings):
     """Model manager configuration."""
+
     vram_budget_mb: int = 14336
     headroom_mb: int = 2048
     warmup_runs: int = 3
@@ -54,6 +58,7 @@ class ModelManagerConfig(BaseSettings):
 
 class ScannerConfig(BaseSettings):
     """Scanner module configuration."""
+
     deduplication_window_minutes: int = 5
     priority_weights: dict[str, float] = Field(default_factory=dict)
     sources: dict[str, Any] = Field(default_factory=dict)
@@ -63,6 +68,7 @@ class ScannerConfig(BaseSettings):
 
 class MarketDataConfig(BaseSettings):
     """Market data module configuration."""
+
     duckdb_path: str = "data/market.duckdb"
     cache_ttl_seconds: int = 1
     sources: dict[str, Any] = Field(default_factory=dict)
@@ -73,6 +79,7 @@ class MarketDataConfig(BaseSettings):
 
 class ChartsConfig(BaseSettings):
     """Chart engine configuration."""
+
     timeframes: list[str] = Field(default_factory=lambda: ["1m", "5m", "15m", "1d"])
     output_shape: list[int] = Field(default_factory=lambda: [4, 256, 256, 3])
     normalization: dict[str, Any] = Field(default_factory=dict)
@@ -83,6 +90,7 @@ class ChartsConfig(BaseSettings):
 
 class IndicatorsConfig(BaseSettings):
     """Indicators configuration."""
+
     vwap: bool = True
     ema_periods: list[int] = Field(default_factory=lambda: [9, 20, 50, 200])
     atr_period: int = 14
@@ -94,6 +102,7 @@ class IndicatorsConfig(BaseSettings):
 
 class VisionConfig(BaseSettings):
     """Vision engine configuration."""
+
     pattern_classes: list[str] = Field(default_factory=list)
     confidence_threshold: float = 0.65
     nms_iou_threshold: float = 0.45
@@ -104,6 +113,7 @@ class VisionConfig(BaseSettings):
 
 class MemoryConfig(BaseSettings):
     """Memory engine configuration."""
+
     qdrant_path: str = "data/qdrant"
     collection_name: str = "trade_embeddings"
     vector_size: int = 768
@@ -118,6 +128,7 @@ class MemoryConfig(BaseSettings):
 
 class ReasoningConfig(BaseSettings):
     """Reasoning engine configuration."""
+
     evidence_weights: dict[str, float] = Field(default_factory=dict)
     min_confidence: float = 0.55
     llm_explainer: dict[str, Any] = Field(default_factory=dict)
@@ -127,6 +138,7 @@ class ReasoningConfig(BaseSettings):
 
 class RiskConfig(BaseSettings):
     """Risk engine configuration."""
+
     hard_rules: dict[str, Any] = Field(default_factory=dict)
     dynamic_rules: dict[str, Any] = Field(default_factory=dict)
 
@@ -135,6 +147,7 @@ class RiskConfig(BaseSettings):
 
 class ExecutionConfig(BaseSettings):
     """Execution engine configuration."""
+
     mode: str = "paper"
     paper: dict[str, Any] = Field(default_factory=dict)
     live: dict[str, Any] = Field(default_factory=dict)
@@ -144,6 +157,7 @@ class ExecutionConfig(BaseSettings):
 
 class JournalConfig(BaseSettings):
     """Journal module configuration."""
+
     jsonl_path: str = "data/journal/decisions"
     duckdb_path: str = "data/journal.duckdb"
     batch_size: int = 100
@@ -154,6 +168,7 @@ class JournalConfig(BaseSettings):
 
 class VideoConfig(BaseSettings):
     """Video pipeline configuration."""
+
     inbox_path: str = "knowledge/ross_videos/inbox"
     processing_path: str = "knowledge/ross_videos/processing"
     done_path: str = "knowledge/ross_videos/done"
@@ -169,6 +184,7 @@ class VideoConfig(BaseSettings):
 
 class DashboardConfig(BaseSettings):
     """Dashboard configuration."""
+
     host: str = "0.0.0.0"
     port: int = 8080
     websocket_ping_interval: int = 30
@@ -179,6 +195,7 @@ class DashboardConfig(BaseSettings):
 
 class HealthConfig(BaseSettings):
     """Health monitoring configuration."""
+
     port: int = 8080
     path: str = "/health"
     metrics_path: str = "/metrics"
@@ -188,6 +205,7 @@ class HealthConfig(BaseSettings):
 
 class LoggingConfig(BaseSettings):
     """Logging configuration."""
+
     level: str = "INFO"
     json_file: str = "logs/tradingos.jsonl"
     console: bool = True
@@ -207,9 +225,9 @@ class Config:
         """Load configuration from YAML files."""
         # Config files are at project root /config, not inside code/
         # In PyInstaller, use sys._MEIPASS for the temp extraction directory
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             # Running in PyInstaller bundle
-            base_path = Path(sys._MEIPASS) / "config"
+            base_path = Path(getattr(sys, "_MEIPASS")) / "config"  # noqa: B009  (PyInstaller-only)
         else:
             # Running in development
             base_path = Path(__file__).parent.parent.parent.parent / "config"

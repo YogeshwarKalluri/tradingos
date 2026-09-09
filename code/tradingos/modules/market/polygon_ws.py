@@ -101,6 +101,9 @@ class PolygonWebSocket(DataSource):
 
     async def _listen(self) -> None:
         """Listen for messages."""
+        if self._ws is None:
+            raise RuntimeError("_listen() called before the socket was connected")
+
         async for message in self._ws:
             if not self._running:
                 break
@@ -157,13 +160,13 @@ class PolygonWebSocket(DataSource):
     async def _handle_bar(self, msg: dict) -> None:
         """Handle minute aggregate (bar)."""
         bar = OHLCV(
-            ticker=msg.get("sym"),
+            ticker=msg.get("sym", ""),
             ts=datetime.fromtimestamp(msg.get("s", 0) / 1000),
-            open=msg.get("o"),
-            high=msg.get("h"),
-            low=msg.get("l"),
-            close=msg.get("c"),
-            volume=msg.get("v"),
+            open=msg.get("o", 0.0),
+            high=msg.get("h", 0.0),
+            low=msg.get("l", 0.0),
+            close=msg.get("c", 0.0),
+            volume=msg.get("v", 0),
             vwap=msg.get("vw"),
             trades=msg.get("n"),
             source="polygon",
@@ -175,10 +178,14 @@ class PolygonWebSocket(DataSource):
         """Subscribe to ticker (internal, assumes connected)."""
         if not self._ws:
             return
-        await self._ws.send(json.dumps({
-            "action": "subscribe",
-            "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
-        }))
+        await self._ws.send(
+            json.dumps(
+                {
+                    "action": "subscribe",
+                    "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
+                }
+            )
+        )
         self._subscriptions.add(ticker)
 
     async def subscribe(self, tickers: list[str]) -> None:
@@ -203,10 +210,14 @@ class PolygonWebSocket(DataSource):
         for ticker in tickers:
             if ticker not in self._subscriptions:
                 continue
-            await self._ws.send(json.dumps({
-                "action": "unsubscribe",
-                "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
-            }))
+            await self._ws.send(
+                json.dumps(
+                    {
+                        "action": "unsubscribe",
+                        "params": f"T.{ticker},Q.{ticker},AM.{ticker}",
+                    }
+                )
+            )
             self._subscriptions.discard(ticker)
 
     async def get_bars(

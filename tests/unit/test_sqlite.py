@@ -17,6 +17,7 @@ class TestSQLitePool:
     def temp_db(self):
         """Create a temporary database path for testing."""
         import uuid
+
         db_path = Path(tempfile.gettempdir()) / f"test_{uuid.uuid4().hex}.db"
         yield db_path
         # Don't try to delete - temp files will be cleaned up by OS
@@ -26,6 +27,7 @@ class TestSQLitePool:
     def pool(self, temp_db):
         """Create a SQLite pool for testing."""
         from database.sqlite.connection import SQLiteConfig
+
         config = SQLiteConfig(path=temp_db, enable_wal=True)
         pool = SQLitePool(config)
         yield pool
@@ -44,8 +46,8 @@ class TestSQLitePool:
         # Read
         rows = pool.fetchall("SELECT * FROM test ORDER BY id")
         assert len(rows) == 2
-        assert rows[0]['value'] == 'hello'
-        assert rows[1]['value'] == 'world'
+        assert rows[0]["value"] == "hello"
+        assert rows[1]["value"] == "world"
 
     def test_fetchone(self, pool):
         """Test fetchone."""
@@ -54,7 +56,7 @@ class TestSQLitePool:
 
         row = pool.fetchone("SELECT * FROM test2 WHERE id = 1")
         assert row is not None
-        assert row['value'] == 'single'
+        assert row["value"] == "single"
 
         # Non-existent
         row = pool.fetchone("SELECT * FROM test2 WHERE id = 999")
@@ -69,7 +71,7 @@ class TestSQLitePool:
         with pool.connection() as conn:
             row = conn.execute("SELECT * FROM test3").fetchone()
             assert row is not None
-            assert row['value'] == 'ctx'
+            assert row["value"] == "ctx"
 
     def test_rollback_on_error(self, pool):
         """Test that rollback works on error."""
@@ -84,7 +86,7 @@ class TestSQLitePool:
             pass
 
         # Original row should still exist
-        count = pool.fetchone("SELECT COUNT(*) as c FROM test4")['c']
+        count = pool.fetchone("SELECT COUNT(*) as c FROM test4")["c"]
         assert count == 1
 
 

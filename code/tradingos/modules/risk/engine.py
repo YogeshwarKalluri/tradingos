@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from tradingos.core.events import FillReceived
 from tradingos.core.logging import get_logger
 from tradingos.modules.reasoning.interfaces import TradeThesis
 from tradingos.modules.risk.interfaces import RiskDecisionResult, RiskEngine
@@ -14,13 +15,14 @@ logger = get_logger(__name__)
 @dataclass
 class RiskLimits:
     """Risk limits configuration."""
-    max_position_pct: float = 0.10      # Max 10% per position
-    max_daily_loss_pct: float = 0.02    # Max 2% daily loss
-    max_drawdown_pct: float = 0.05      # Max 5% drawdown
-    max_open_positions: int = 5         # Max concurrent positions
+
+    max_position_pct: float = 0.10  # Max 10% per position
+    max_daily_loss_pct: float = 0.02  # Max 2% daily loss
+    max_drawdown_pct: float = 0.05  # Max 5% drawdown
+    max_open_positions: int = 5  # Max concurrent positions
     max_sector_exposure_pct: float = 0.20  # Max 20% per sector
-    min_risk_reward: float = 1.5        # Min 1.5:1 risk/reward
-    max_correlation: float = 0.7        # Max correlation between positions
+    min_risk_reward: float = 1.5  # Min 1.5:1 risk/reward
+    max_correlation: float = 0.7  # Max correlation between positions
 
 
 class RiskEngineImpl(RiskEngine):
@@ -75,8 +77,7 @@ class RiskEngineImpl(RiskEngine):
             return RiskDecisionResult(
                 approved=False,
                 reason=(
-                    f"Position size exceeds limit "
-                    f"({position_value:.0f} > {max_position_value:.0f})"
+                    f"Position size exceeds limit ({position_value:.0f} > {max_position_value:.0f})"
                 ),
                 risk_score=0.8,
             )
@@ -133,15 +134,24 @@ class RiskEngineImpl(RiskEngine):
         # Simplified: check sector overlap
         # In production, would use actual correlation matrix
         sector_map = {
-            "AAPL": "tech", "MSFT": "tech", "NVDA": "tech", "GOOGL": "tech",
-            "TSLA": "auto", "F": "auto", "GM": "auto",
-            "JPM": "finance", "BAC": "finance", "GS": "finance",
-            "XOM": "energy", "CVX": "energy",
+            "AAPL": "tech",
+            "MSFT": "tech",
+            "NVDA": "tech",
+            "GOOGL": "tech",
+            "TSLA": "auto",
+            "F": "auto",
+            "GM": "auto",
+            "JPM": "finance",
+            "BAC": "finance",
+            "GS": "finance",
+            "XOM": "energy",
+            "CVX": "energy",
         }
         ticker_sector = sector_map.get(ticker, "other")
 
         sector_exposure = sum(
-            1 for pos in self.open_positions.values()
+            1
+            for pos in self.open_positions.values()
             if sector_map.get(pos.get("ticker", ""), "other") == ticker_sector
         )
 
@@ -175,12 +185,17 @@ class RiskEngineImpl(RiskEngine):
 
         return size
 
-    async def on_fill(self, fill_event) -> None:
+    async def on_fill(self, fill_event: FillReceived) -> None:
         """Update state on order fill."""
-        ticker = fill_event.ticker
-        qty = fill_event.qty
-        price = fill_event.price
-        side = fill_event.side
+        fill = fill_event.fill
+        if fill is None:
+            logger.warning("fill_event_missing_fill", event_id=fill_event.event_id)
+            return
+
+        ticker = fill.ticker
+        qty = fill.qty
+        price = fill.price
+        side = fill.side
 
         if side == "buy":
             if ticker not in self.open_positions:
@@ -206,11 +221,13 @@ class RiskEngineImpl(RiskEngine):
         self.daily_pnl += pnl
         self.account_equity += pnl
         self.peak_equity = max(self.peak_equity, self.account_equity)
-        self.trade_history.append({
-            "ticker": ticker,
-            "pnl": pnl,
-            "timestamp": datetime.now(UTC).isoformat(),
-        })
+        self.trade_history.append(
+            {
+                "ticker": ticker,
+                "pnl": pnl,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
 
     async def reset_daily(self) -> None:
         """Reset daily counters (call at market open)."""

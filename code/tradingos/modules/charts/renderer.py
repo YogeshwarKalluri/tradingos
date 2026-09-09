@@ -1,5 +1,6 @@
 """Chart Engine - GPU-accelerated chart rendering using Numba/CUDA."""
 
+from typing import Any
 
 import numpy as np
 from numba import cuda
@@ -29,19 +30,27 @@ class GPUChartRenderer(ChartRenderer):
             logger.info("cuda_available", device=cuda.get_current_device().name)
         except Exception as e:
             logger.warning("cuda_not_available", error=str(e))
-            raise RuntimeError(
-                "CUDA not available - GPU chart renderer requires NVIDIA GPU"
-            ) from e
+            raise RuntimeError("CUDA not available - GPU chart renderer requires NVIDIA GPU") from e
 
     @staticmethod
     @cuda.jit
     def _render_ohlcv_kernel(
-        opens, highs, lows, closes, volumes,
-        output, height, width, candle_width, gap
-    ):
+        opens: Any,
+        highs: Any,
+        lows: Any,
+        closes: Any,
+        volumes: Any,
+        output: Any,
+        height: Any,
+        width: Any,
+        candle_width: Any,
+        gap: Any,
+    ) -> None:
         """CUDA kernel to render OHLCV candles."""
-        tx = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
-        ty = cuda.threadIdx.y + cuda.blockIdx.y * cuda.blockDim.y
+        # numba types cuda.blockIdx/blockDim as callables; the kernel indexing
+        # idiom below is not expressible to mypy.
+        tx = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x  # type: ignore[operator]
+        ty = cuda.threadIdx.y + cuda.blockIdx.y * cuda.blockDim.y  # type: ignore[operator]
 
         if tx >= width or ty >= height:
             return
@@ -109,11 +118,11 @@ class GPUChartRenderer(ChartRenderer):
 
             # Convert to numpy arrays
             n = len(tf_bars)
-            opens = np.array([b['open'] for b in tf_bars], dtype=np.float32)
-            highs = np.array([b['high'] for b in tf_bars], dtype=np.float32)
-            lows = np.array([b['low'] for b in tf_bars], dtype=np.float32)
-            closes = np.array([b['close'] for b in tf_bars], dtype=np.float32)
-            volumes = np.array([b.get('volume', 0) for b in tf_bars], dtype=np.float32)
+            opens = np.array([b["open"] for b in tf_bars], dtype=np.float32)
+            highs = np.array([b["high"] for b in tf_bars], dtype=np.float32)
+            lows = np.array([b["low"] for b in tf_bars], dtype=np.float32)
+            closes = np.array([b["close"] for b in tf_bars], dtype=np.float32)
+            volumes = np.array([b.get("volume", 0) for b in tf_bars], dtype=np.float32)
 
             # Normalize volume
             if volumes.max() > 0:
@@ -126,15 +135,23 @@ class GPUChartRenderer(ChartRenderer):
             threads_per_block = (16, 16)
             blocks_per_grid = (
                 (self.width + threads_per_block[0] - 1) // threads_per_block[0],
-                (self.height + threads_per_block[1] - 1) // threads_per_block[1]
+                (self.height + threads_per_block[1] - 1) // threads_per_block[1],
             )
 
             candle_width = max(1, self.width // max(n, 1) - 1)
             gap = 1
 
             self._render_ohlcv_kernel[blocks_per_grid, threads_per_block](
-                opens, highs, lows, closes, volumes,
-                output, self.height, self.width, candle_width, gap
+                opens,
+                highs,
+                lows,
+                closes,
+                volumes,
+                output,
+                self.height,
+                self.width,
+                candle_width,
+                gap,
             )
 
             # Copy back to host
@@ -144,7 +161,7 @@ class GPUChartRenderer(ChartRenderer):
         return ChartTensor(
             ticker=ticker,
             timeframes=timeframes,
-            metadata={"shape": self.output_shape, "renderer": "gpu"}
+            metadata={"shape": self.output_shape, "renderer": "gpu"},
         )
 
 
@@ -166,10 +183,10 @@ class CPUChartRenderer(ChartRenderer):
             n = len(tf_bars)
             tensor = np.zeros((self.height, self.width, 3), dtype=np.float32)
 
-            opens = np.array([b['open'] for b in tf_bars])
-            highs = np.array([b['high'] for b in tf_bars])
-            lows = np.array([b['low'] for b in tf_bars])
-            closes = np.array([b['close'] for b in tf_bars])
+            opens = np.array([b["open"] for b in tf_bars])
+            highs = np.array([b["high"] for b in tf_bars])
+            lows = np.array([b["low"] for b in tf_bars])
+            closes = np.array([b["close"] for b in tf_bars])
 
             candle_width = max(1, self.width // max(n, 1) - 1)
             gap = 1
@@ -209,7 +226,7 @@ class CPUChartRenderer(ChartRenderer):
         return ChartTensor(
             ticker=ticker,
             timeframes=timeframes,
-            metadata={"shape": self.output_shape, "renderer": "cpu"}
+            metadata={"shape": self.output_shape, "renderer": "cpu"},
         )
 
 

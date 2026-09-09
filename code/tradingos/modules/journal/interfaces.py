@@ -8,6 +8,7 @@ from typing import Any
 @dataclass
 class TradeRecord:
     """Complete trade record for journal."""
+
     trade_id: str
     ticker: str
     side: str  # long, short

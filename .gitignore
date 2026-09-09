@@ -28,7 +28,12 @@ logs/
 *.log
 
 # Data files
-data/
+# Ignore the contents rather than the directory: git does not descend into an
+# excluded directory, so a negation inside `data/` would never take effect.
+# The directory itself must exist -- the duckdb/sqlite pools open databases in
+# it and do not create it.
+data/*
+!data/.gitkeep
 *.duckdb
 *.db
 *.sqlite

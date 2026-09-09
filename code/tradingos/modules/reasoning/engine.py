@@ -1,13 +1,18 @@
 """Reasoning Engine - Combines chart, indicators, memory into trade thesis."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from tradingos.core.logging import get_logger
 from tradingos.modules.indicators.interfaces import IndicatorSnapshot
 from tradingos.modules.memory.interfaces import HistoricalTrade
 from tradingos.modules.reasoning.interfaces import ReasoningEngine, TradeThesis
 from tradingos.modules.vision.interfaces import VisionOutput
+
+if TYPE_CHECKING:  # annotation only: importing the scanner package pulls in aiohttp
+    from tradingos.modules.scanner.interfaces import StockCandidate
 
 logger = get_logger(__name__)
 
@@ -19,20 +24,23 @@ class CompositeReasoningEngine(ReasoningEngine):
         self.config = config or {}
         self.confidence_threshold = self.config.get("confidence_threshold", 0.65)
         self.min_similar_trades = self.config.get("min_similar_trades", 3)
-        self.pattern_weights = self.config.get("pattern_weights", {
-            "bull_flag": 1.2,
-            "flat_top_breakout": 1.1,
-            "vwap_reclaim": 1.15,
-            "opening_range_breakout": 1.1,
-            "double_bottom": 1.05,
-            "cup_and_handle": 1.05,
-            "no_pattern": 0.5,
-        })
+        self.pattern_weights = self.config.get(
+            "pattern_weights",
+            {
+                "bull_flag": 1.2,
+                "flat_top_breakout": 1.1,
+                "vwap_reclaim": 1.15,
+                "opening_range_breakout": 1.1,
+                "double_bottom": 1.05,
+                "cup_and_handle": 1.05,
+                "no_pattern": 0.5,
+            },
+        )
         logger.info("reasoning_engine_initialized", config=self.config)
 
     async def analyze(
         self,
-        candidate,
+        candidate: StockCandidate,
         indicators: IndicatorSnapshot | None,
         vision: VisionOutput | None,
         similar_trades: list[HistoricalTrade] | None,
@@ -67,9 +75,9 @@ class CompositeReasoningEngine(ReasoningEngine):
         }
 
         composite = (
-            weights["pattern"] * pattern_confidence * pattern_weight +
-            weights["technical"] * tech_score +
-            weights["historical"] * hist_win_rate
+            weights["pattern"] * pattern_confidence * pattern_weight
+            + weights["technical"] * tech_score
+            + weights["historical"] * hist_win_rate
         )
 
         # Normalize
@@ -102,9 +110,7 @@ class CompositeReasoningEngine(ReasoningEngine):
             )
 
         indicators_used = (
-            list(indicators.indicators.keys())
-            if indicators and indicators.indicators
-            else []
+            list(indicators.indicators.keys()) if indicators and indicators.indicators else []
         )
         thesis = TradeThesis(
             ticker=ticker,

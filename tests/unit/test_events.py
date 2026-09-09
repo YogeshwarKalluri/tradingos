@@ -23,8 +23,7 @@ class TestEventBus:
         reset_config()
         config = get_config("development")
         bus = EventBus(
-            queue_size=config.event_bus.queue_size,
-            worker_count=config.event_bus.worker_count
+            queue_size=config.event_bus.queue_size, worker_count=config.event_bus.worker_count
         )
         set_event_bus(bus)
         yield bus

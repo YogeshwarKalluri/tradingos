@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import (
+    Condition,
     Distance,
     FieldCondition,
     Filter,
@@ -39,6 +40,12 @@ class QdrantMemoryEngine(MemoryEngine):
         self.collection_name = collection_name
         self.client: AsyncQdrantClient | None = None
         self._initialized = False
+
+    def _require_client(self) -> AsyncQdrantClient:
+        """Return the client, or fail clearly if initialize() was not called."""
+        if self.client is None:
+            raise RuntimeError("initialize() must be called before using the memory engine")
+        return self.client
 
     async def initialize(self) -> None:
         """Initialize Qdrant client and collection."""
@@ -98,7 +105,7 @@ class QdrantMemoryEngine(MemoryEngine):
             },
         )
 
-        await self.client.upsert(
+        await self._require_client().upsert(
             collection_name=self.collection_name,
             points=[point],
         )
@@ -118,27 +125,27 @@ class QdrantMemoryEngine(MemoryEngine):
         # Build filter
         filter_obj = None
         if filters:
-            conditions = []
+            conditions: list[Condition] = []
             for key, value in filters.items():
-                conditions.append(
-                    FieldCondition(key=key, match=MatchValue(value=value))
-                )
+                conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
             if conditions:
                 filter_obj = Filter(must=conditions)
 
-        # Search
-        results = await self.client.search(
+        # Search. qdrant-client removed .search(); query_points() is the
+        # replacement and returns a QueryResponse whose .points holds the hits.
+        response = await self._require_client().query_points(
             collection_name=self.collection_name,
-            query_vector=query_embedding.tolist(),
+            query=query_embedding.tolist(),
             limit=limit,
             query_filter=filter_obj,
             with_payload=True,
         )
+        results = response.points
 
         # Convert to HistoricalTrade objects
         trades = []
         for hit in results:
-            payload = hit.payload
+            payload = hit.payload or {}
             trade = HistoricalTrade(
                 id=str(hit.id),
                 ticker=payload.get("ticker", ""),
@@ -164,11 +171,11 @@ class QdrantMemoryEngine(MemoryEngine):
         """Get memory engine statistics."""
         await self.initialize()
 
-        info = await self.client.get_collection(self.collection_name)
+        info = await self._require_client().get_collection(self.collection_name)
 
         return {
             "collection": self.collection_name,
-            "vectors_count": info.vectors_count,
+            "indexed_vectors_count": info.indexed_vectors_count,
             "points_count": info.points_count,
             "vector_size": self.vector_size,
             "status": info.status,
@@ -215,7 +222,7 @@ class QdrantMemoryEngine(MemoryEngine):
         if len(embedding) < self.vector_size:
             embedding = np.pad(embedding, (0, self.vector_size - len(embedding)))
         else:
-            embedding = embedding[:self.vector_size]
+            embedding = embedding[: self.vector_size]
 
         # Normalize
         norm = np.linalg.norm(embedding)
@@ -235,7 +242,7 @@ class QdrantMemoryEngine(MemoryEngine):
 class MockMemoryEngine(MemoryEngine):
     """Mock memory engine for development/testing."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         self.trades: list[HistoricalTrade] = []
         logger.info("mock_memory_engine_initialized")
 
@@ -255,6 +262,7 @@ class MockMemoryEngine(MemoryEngine):
     ) -> list[HistoricalTrade]:
         # Return random subset for testing
         import random
+
         return random.sample(self.trades, min(limit, len(self.trades)))
 
     async def get_stats(self) -> dict[str, Any]:
@@ -267,7 +275,7 @@ class MockMemoryEngine(MemoryEngine):
         pass
 
 
-def create_memory_engine(use_mock: bool = True, **kwargs) -> MemoryEngine:
+def create_memory_engine(use_mock: bool = True, **kwargs: Any) -> MemoryEngine:
     """Factory function to create memory engine."""
     if use_mock:
         return MockMemoryEngine(**kwargs)
