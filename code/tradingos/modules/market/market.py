@@ -24,8 +24,8 @@ class MarketDataModule:
         self.duckdb = DuckDBStore(self.config.duckdb_path)
         self.cache = MarketCache(default_ttl=self.config.cache_ttl_seconds)
         self.gap_detector = GapDetector(
-            max_gap_minutes=self.config.gap_detection.max_gap_minutes,
-            interpolate_small_gaps=self.config.gap_detection.interpolate_small_gaps,
+            max_gap_minutes=self.config.gap_detection.get("max_gap_minutes", 5),
+            interpolate_small_gaps=self.config.gap_detection.get("interpolate_small_gaps", True),
         )
         self.polygon_ws = PolygonWebSocket(
             on_bar=self._on_bar,

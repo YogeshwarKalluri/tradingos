@@ -187,10 +187,15 @@ class RiskEngineImpl(RiskEngine):
 
     async def on_fill(self, fill_event: FillReceived) -> None:
         """Update state on order fill."""
-        ticker = fill_event.ticker
-        qty = fill_event.qty
-        price = fill_event.price
-        side = fill_event.side
+        fill = fill_event.fill
+        if fill is None:
+            logger.warning("fill_event_missing_fill", event_id=fill_event.event_id)
+            return
+
+        ticker = fill.ticker
+        qty = fill.qty
+        price = fill.price
+        side = fill.side
 
         if side == "buy":
             if ticker not in self.open_positions:

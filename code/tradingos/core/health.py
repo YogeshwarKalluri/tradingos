@@ -1,6 +1,7 @@
 """TradingOS Health & Metrics Endpoints."""
 
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any
 
@@ -34,6 +35,7 @@ class HealthServer:
         self.app = FastAPI(title="TradingOS Health", lifespan=self._lifespan)
         self._setup_routes()
 
+    @asynccontextmanager
     async def _lifespan(self, app: FastAPI) -> AsyncIterator[None]:
         """Application lifespan manager."""
         logger.info("health_server_starting")
