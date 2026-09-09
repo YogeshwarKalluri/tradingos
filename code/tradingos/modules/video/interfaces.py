@@ -14,7 +14,7 @@ class VideoSource:
     local_path: str | None = None
     keywords: list[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.keywords is None:
             self.keywords = []
 

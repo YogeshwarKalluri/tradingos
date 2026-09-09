@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any
 
 import websockets
+from websockets.client import WebSocketClientProtocol
 
 from tradingos.core.logging import get_logger
 from tradingos.modules.market.interfaces import OHLCV, DataSource
@@ -31,10 +32,10 @@ class AlpacaWebSocket(DataSource):
         self.on_trade = on_trade
         self.on_quote = on_quote
 
-        self._ws = None
+        self._ws: WebSocketClientProtocol | None = None
         self._running = False
-        self._task = None
-        self._subscriptions = set()
+        self._task: asyncio.Task | None = None
+        self._subscriptions: set[str] = set()
 
     async def start(self) -> None:
         """Start WebSocket connection."""
@@ -90,6 +91,9 @@ class AlpacaWebSocket(DataSource):
         logger.info("alpaca_ws_connected")
 
     async def _listen(self) -> None:
+        if self._ws is None:
+            raise RuntimeError("_listen() called before the socket was connected")
+
         async for message in self._ws:
             if not self._running:
                 break

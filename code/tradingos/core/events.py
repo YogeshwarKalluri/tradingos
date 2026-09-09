@@ -39,7 +39,7 @@ class Event:
     timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     source: str = "unknown"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.trace_id:
             self.trace_id = get_trace_id()
 

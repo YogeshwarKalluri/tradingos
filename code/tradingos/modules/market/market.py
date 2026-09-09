@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 class MarketDataModule:
     """Main market data coordinator."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = get_config().market_data
         self.duckdb = DuckDBStore(self.config.duckdb_path)
         self.cache = MarketCache(default_ttl=self.config.cache_ttl_seconds)

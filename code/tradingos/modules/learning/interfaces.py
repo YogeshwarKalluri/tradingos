@@ -29,7 +29,7 @@ class TrainingConfig:
     validation_split: float = 0.2
     hyperparams: dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.hyperparams is None:
             self.hyperparams = {}
 

@@ -38,7 +38,7 @@ class HealthServer:
         yield
         logger.info("health_server_stopping")
 
-    def _setup_routes(self):
+    def _setup_routes(self) -> None:
         """Setup HTTP routes."""
 
         @self.app.get(self.config.path)
