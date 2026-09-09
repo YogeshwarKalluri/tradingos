@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from tradingos.core.events import OrderFilled
+from tradingos.core.events import FillReceived
 from tradingos.core.logging import get_logger
 from tradingos.modules.execution.interfaces import ExecutionEngine, Fill, Order
 
@@ -170,17 +170,7 @@ class PaperExecutionEngine(ExecutionEngine):
             # Publish fill event
             from tradingos.core.events import publish_event
 
-            await publish_event(
-                OrderFilled(
-                    order_id=order.order_id,
-                    fill_id=fill.fill_id,
-                    ticker=order.ticker,
-                    side=order.side,
-                    qty=order.qty,
-                    price=fill_price,
-                    commission=commission,
-                )
-            )
+            await publish_event(FillReceived(fill=fill))
 
         except asyncio.CancelledError:
             order.status = "cancelled"

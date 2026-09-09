@@ -186,16 +186,19 @@ class IPCSource(ScannerSource):
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
 
-        # Connect to FIFO
-        async with open(self.pipe_path) as f:
-            transport, _ = await loop.connect_read_pipe(lambda: protocol, f)
+        # Connect to FIFO. open() returns a synchronous file object, so this
+        # cannot be an `async with`; and the pipe must stay open for the
+        # lifetime of the transport, which takes ownership and closes it in the
+        # finally below.
+        pipe = open(self.pipe_path)  # noqa: SIM115
+        transport, _ = await loop.connect_read_pipe(lambda: protocol, pipe)
 
         try:
             while self._running:
-                line = await reader.readline()
-                if not line:
+                raw = await reader.readline()
+                if not raw:
                     break
-                line = line.decode().strip()
+                line = raw.decode().strip()
                 if not line:
                     continue
 

@@ -97,34 +97,36 @@ async def create_scanner(config: ScannerConfig | None = None) -> Scanner:
 
     app_config = get_config()
 
+    # ScannerConfig.sources is a plain dict[str, Any] loaded from YAML, so its
+    # entries are dicts and must be indexed, not attribute-accessed.
+    sources = app_config.scanner.sources
+
     # File watch source
-    if app_config.scanner.sources.file_watch.enabled:
+    file_watch = sources.get("file_watch", {})
+    if file_watch.get("enabled"):
         file_source = FileWatchSource(
-            path=app_config.scanner.sources.file_watch.path,
-            pattern=app_config.scanner.sources.file_watch.pattern,
+            path=file_watch["path"],
+            pattern=file_watch["pattern"],
             callback=scanner._on_candidates,
         )
         scanner.add_source(file_source)
 
     # Webhook source
-    if app_config.scanner.sources.webhook.enabled:
-        webhook_host = (
-            app_config.scanner.sources.webhook.host
-            if hasattr(app_config.scanner.sources.webhook, "host")
-            else "0.0.0.0"
-        )
+    webhook = sources.get("webhook", {})
+    if webhook.get("enabled"):
         webhook_source = WebhookSource(
-            host=webhook_host,
-            port=app_config.scanner.sources.webhook.port,
-            path=app_config.scanner.sources.webhook.path,
+            host=webhook.get("host", "0.0.0.0"),
+            port=webhook["port"],
+            path=webhook["path"],
             callback=scanner._on_candidates,
         )
         scanner.add_source(webhook_source)
 
     # IPC source
-    if app_config.scanner.sources.ipc.enabled:
+    ipc = sources.get("ipc", {})
+    if ipc.get("enabled"):
         ipc_source = IPCSource(
-            pipe_path=app_config.scanner.sources.ipc.pipe_name,
+            pipe_path=ipc["pipe_name"],
             callback=scanner._on_candidates,
         )
         scanner.add_source(ipc_source)

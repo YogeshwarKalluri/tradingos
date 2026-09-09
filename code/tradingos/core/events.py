@@ -57,8 +57,8 @@ class StockDetected(Event):
 class MarketDataReady(Event):
     """Market data enriched for candidate."""
 
-    candidate: StockCandidate = None
-    market_data: MarketData = None
+    candidate: StockCandidate | None = None
+    market_data: MarketData | None = None
     source: str = "market_data"
 
 
@@ -66,8 +66,8 @@ class MarketDataReady(Event):
 class ChartReady(Event):
     """Chart tensor generated for candidate."""
 
-    candidate: StockCandidate = None
-    chart_tensor: ChartTensor = None
+    candidate: StockCandidate | None = None
+    chart_tensor: ChartTensor | None = None
     source: str = "charts"
 
 
@@ -75,8 +75,8 @@ class ChartReady(Event):
 class IndicatorsReady(Event):
     """Indicators calculated for candidate."""
 
-    candidate: StockCandidate = None
-    indicators: IndicatorSnapshot = None
+    candidate: StockCandidate | None = None
+    indicators: IndicatorSnapshot | None = None
     source: str = "indicators"
 
 
@@ -84,8 +84,8 @@ class IndicatorsReady(Event):
 class VisionResult(Event):
     """Vision analysis complete for candidate."""
 
-    candidate: StockCandidate = None
-    vision_output: VisionOutput = None
+    candidate: StockCandidate | None = None
+    vision_output: VisionOutput | None = None
     source: str = "vision"
 
 
@@ -93,7 +93,7 @@ class VisionResult(Event):
 class MemoryResults(Event):
     """Similar historical trades retrieved."""
 
-    candidate: StockCandidate = None
+    candidate: StockCandidate | None = None
     similar_trades: list[HistoricalTrade] = field(default_factory=list)
     source: str = "memory"
 
@@ -102,8 +102,8 @@ class MemoryResults(Event):
 class ThesisReady(Event):
     """Reasoning engine produced trade thesis."""
 
-    candidate: StockCandidate = None
-    thesis: TradeThesis = None
+    candidate: StockCandidate | None = None
+    thesis: TradeThesis | None = None
     source: str = "reasoning"
 
 
@@ -111,8 +111,8 @@ class ThesisReady(Event):
 class RiskDecision(Event):
     """Risk engine decision."""
 
-    candidate: StockCandidate = None
-    decision: RiskDecisionResult = None
+    candidate: StockCandidate | None = None
+    decision: RiskDecisionResult | None = None
     source: str = "risk"
 
 
@@ -120,7 +120,7 @@ class RiskDecision(Event):
 class OrderSubmitted(Event):
     """Order submitted to execution engine."""
 
-    order: Order = None
+    order: Order | None = None
     source: str = "execution"
 
 
@@ -128,7 +128,7 @@ class OrderSubmitted(Event):
 class FillReceived(Event):
     """Fill received from execution."""
 
-    fill: Fill = None
+    fill: Fill | None = None
     source: str = "execution"
 
 
