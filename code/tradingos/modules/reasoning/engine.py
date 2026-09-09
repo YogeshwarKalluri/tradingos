@@ -1,14 +1,18 @@
 """Reasoning Engine - Combines chart, indicators, memory into trade thesis."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from tradingos.core.logging import get_logger
 from tradingos.modules.indicators.interfaces import IndicatorSnapshot
 from tradingos.modules.memory.interfaces import HistoricalTrade
 from tradingos.modules.reasoning.interfaces import ReasoningEngine, TradeThesis
-from tradingos.modules.scanner.interfaces import StockCandidate
 from tradingos.modules.vision.interfaces import VisionOutput
+
+if TYPE_CHECKING:  # annotation only: importing the scanner package pulls in aiohttp
+    from tradingos.modules.scanner.interfaces import StockCandidate
 
 logger = get_logger(__name__)
 

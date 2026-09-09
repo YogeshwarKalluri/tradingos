@@ -5,7 +5,7 @@ import contextlib
 import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 try:
     import torch
@@ -157,7 +157,7 @@ class ModelManager:
         """Import model class from string."""
         module_path, class_name = loader_str.rsplit(":", 1)
         module = __import__(module_path, fromlist=[class_name])
-        return getattr(module, class_name)
+        return cast(type[BaseModel], getattr(module, class_name))
 
     def load_model(self, name: str, device: Optional["torch.device"] = None) -> BaseModel:
         """Load a model by name."""

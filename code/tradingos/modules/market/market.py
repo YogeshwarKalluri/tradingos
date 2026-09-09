@@ -1,7 +1,10 @@
 """Market Data module - coordinates all market data sources."""
 
+from __future__ import annotations
+
 import asyncio
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 from tradingos.core.config import get_config
 from tradingos.core.events import MarketDataReady, publish_event
@@ -11,7 +14,9 @@ from tradingos.modules.market.duckdb_store import DuckDBStore
 from tradingos.modules.market.gap_detector import GapDetector
 from tradingos.modules.market.interfaces import OHLCV, MarketData
 from tradingos.modules.market.polygon_ws import PolygonWebSocket
-from tradingos.modules.scanner.interfaces import StockCandidate
+
+if TYPE_CHECKING:  # annotation only: importing the scanner package pulls in aiohttp
+    from tradingos.modules.scanner.interfaces import StockCandidate
 
 logger = get_logger(__name__)
 

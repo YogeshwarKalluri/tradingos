@@ -41,6 +41,7 @@ class TrainingResult:
     started_at: str
     completed_at: str | None = None
     status: str = "running"  # running, completed, failed
+    error: str | None = None
 
 
 class LearningEngine:

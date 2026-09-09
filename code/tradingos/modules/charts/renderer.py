@@ -47,8 +47,10 @@ class GPUChartRenderer(ChartRenderer):
         gap: Any,
     ) -> None:
         """CUDA kernel to render OHLCV candles."""
-        tx = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
-        ty = cuda.threadIdx.y + cuda.blockIdx.y * cuda.blockDim.y
+        # numba types cuda.blockIdx/blockDim as callables; the kernel indexing
+        # idiom below is not expressible to mypy.
+        tx = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x  # type: ignore[operator]
+        ty = cuda.threadIdx.y + cuda.blockIdx.y * cuda.blockDim.y  # type: ignore[operator]
 
         if tx >= width or ty >= height:
             return

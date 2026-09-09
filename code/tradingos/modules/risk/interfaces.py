@@ -24,5 +24,5 @@ class RiskDecisionResult:
 class RiskEngine:
     """Base class for risk evaluation."""
 
-    async def evaluate(self, candidate: Any, market_data: Any) -> RiskDecisionResult:
+    async def evaluate(self, thesis: Any) -> RiskDecisionResult:
         raise NotImplementedError

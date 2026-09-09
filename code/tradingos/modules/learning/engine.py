@@ -160,7 +160,7 @@ class MLLearningEngine(LearningEngine):
         except Exception as e:
             result.status = "failed"
             result.completed_at = datetime.now(UTC).isoformat()
-            result.metrics = {"error": str(e)}
+            result.error = str(e)
             self._save_history()
             logger.error("training_failed", run_id=run_id, error=str(e))
             raise

@@ -139,7 +139,7 @@ class ONNXVisionEngine(VisionEngine):
             probs = self._softmax(logits)
 
             # Get top predictions above threshold
-            detected_patterns = []
+            detected_patterns: list[dict[str, Any]] = []
             for i, prob in enumerate(probs):
                 if prob >= self.confidence_threshold and i < len(PATTERN_CLASSES):
                     detected_patterns.append(
@@ -175,7 +175,8 @@ class ONNXVisionEngine(VisionEngine):
     def _softmax(x: np.ndarray) -> np.ndarray:
         """Numerically stable softmax."""
         exp_x = np.exp(x - np.max(x))
-        return exp_x / exp_x.sum()
+        result: np.ndarray = exp_x / exp_x.sum()
+        return result
 
 
 class MockVisionEngine(VisionEngine):

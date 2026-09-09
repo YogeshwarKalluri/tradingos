@@ -107,6 +107,9 @@ class PaperExecutionEngine(ExecutionEngine):
 
     async def _execute_market_order(self, order: Order) -> None:
         """Execute a market order with slippage simulation."""
+        if order.order_id is None:
+            raise RuntimeError("order must be placed before it can be executed")
+
         try:
             # Get current market price
             current_price = await self._get_current_price(order.ticker)

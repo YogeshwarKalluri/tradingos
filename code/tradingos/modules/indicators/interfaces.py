@@ -19,7 +19,7 @@ class IndicatorSnapshot:
     rsi: float | None = None
     rvol: float | None = None
     gap_pct: float | None = None
-    indicators: dict[str, float] | None = None
+    indicators: dict[str, float | None] | None = None
 
 
 class IndicatorEngine:

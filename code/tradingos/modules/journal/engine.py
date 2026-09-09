@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import polars as pl
 
@@ -103,8 +103,8 @@ class FileJournalEngine(JournalEngine):
         avg_loss = losses["pnl"].mean() if len(losses) > 0 else 0.0
 
         total_pnl = df["pnl"].sum()
-        gross_profit = wins["pnl"].sum() if len(wins) > 0 else 0.0
-        gross_loss = abs(losses["pnl"].sum()) if len(losses) > 0 else 0.0
+        gross_profit = float(cast(Any, wins["pnl"].sum())) if len(wins) > 0 else 0.0
+        gross_loss = float(abs(cast(Any, losses["pnl"].sum()))) if len(losses) > 0 else 0.0
         profit_factor = gross_profit / gross_loss if gross_loss > 0 else float("inf")
 
         # Daily P&L for Sharpe and drawdown

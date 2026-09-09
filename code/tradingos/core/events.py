@@ -324,9 +324,11 @@ class EventBus:
     def get_stats(self) -> dict[str, Any]:
         """Get event bus statistics."""
         stats = {}
+        # _queues is keyed by event class, _event_counts by class name.
+        queues_by_name = {t.__name__: q for t, q in self._queues.items()}
         for event_name, count in self._event_counts.items():
             avg_latency = self._latency_sum[event_name] / count if count > 0 else 0
-            queue = self._queues.get(event_name)
+            queue = queues_by_name.get(event_name)
             queue_size = queue.qsize() if queue else 0
             stats[event_name] = {
                 "count": count,
