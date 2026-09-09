@@ -1,6 +1,6 @@
 """Video Pipeline interfaces - Ross Cameron content automation."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -12,11 +12,7 @@ class VideoSource:
     channel_id: str | None = None
     video_id: str | None = None
     local_path: str | None = None
-    keywords: list[str] | None = None
-
-    def __post_init__(self) -> None:
-        if self.keywords is None:
-            self.keywords = []
+    keywords: list[str] = field(default_factory=list)
 
 
 @dataclass

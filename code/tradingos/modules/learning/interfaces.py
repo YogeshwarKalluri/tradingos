@@ -1,6 +1,6 @@
 """Learning Engine interfaces - After-hours model training pipeline."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -27,11 +27,7 @@ class TrainingConfig:
     train_start: str | None = None
     train_end: str | None = None
     validation_split: float = 0.2
-    hyperparams: dict[str, Any] | None = None
-
-    def __post_init__(self) -> None:
-        if self.hyperparams is None:
-            self.hyperparams = {}
+    hyperparams: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

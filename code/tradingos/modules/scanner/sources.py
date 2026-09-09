@@ -4,6 +4,7 @@ import json
 import os
 from collections.abc import Awaitable, Callable
 from pathlib import Path
+from typing import Any
 
 from aiohttp import web
 from watchfiles import watch
@@ -100,8 +101,8 @@ class WebhookSource(ScannerSource):
         self.port = port
         self.path = path
         self.callback = callback
-        self._app = None
-        self._server = None
+        self._app: web.Application | None = None
+        self._server: Any = None
 
     async def start(self) -> None:
         """Start the webhook server."""

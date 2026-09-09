@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import (
+    Condition,
     Distance,
     FieldCondition,
     Filter,
@@ -124,25 +125,27 @@ class QdrantMemoryEngine(MemoryEngine):
         # Build filter
         filter_obj = None
         if filters:
-            conditions = []
+            conditions: list[Condition] = []
             for key, value in filters.items():
                 conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
             if conditions:
                 filter_obj = Filter(must=conditions)
 
-        # Search
-        results = await self._require_client().search(
+        # Search. qdrant-client removed .search(); query_points() is the
+        # replacement and returns a QueryResponse whose .points holds the hits.
+        response = await self._require_client().query_points(
             collection_name=self.collection_name,
-            query_vector=query_embedding.tolist(),
+            query=query_embedding.tolist(),
             limit=limit,
             query_filter=filter_obj,
             with_payload=True,
         )
+        results = response.points
 
         # Convert to HistoricalTrade objects
         trades = []
         for hit in results:
-            payload = hit.payload
+            payload = hit.payload or {}
             trade = HistoricalTrade(
                 id=str(hit.id),
                 ticker=payload.get("ticker", ""),
@@ -172,7 +175,7 @@ class QdrantMemoryEngine(MemoryEngine):
 
         return {
             "collection": self.collection_name,
-            "vectors_count": info.vectors_count,
+            "indexed_vectors_count": info.indexed_vectors_count,
             "points_count": info.points_count,
             "vector_size": self.vector_size,
             "status": info.status,
