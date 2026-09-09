@@ -1,4 +1,4 @@
-"""Indicators Engine interfaces - stub for forward references."""
+"""Indicators Engine interfaces."""
 
 from dataclasses import dataclass
 from typing import Any
@@ -16,6 +16,7 @@ class IndicatorSnapshot:
     ema_50: float | None = None
     ema_200: float | None = None
     atr: float | None = None
+    rsi: float | None = None
     rvol: float | None = None
     gap_pct: float | None = None
     indicators: dict[str, float] | None = None

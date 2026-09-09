@@ -1,4 +1,4 @@
-"""Risk Engine interfaces - stub for forward references."""
+"""Risk Engine interfaces."""
 
 from dataclasses import dataclass
 from typing import Any
@@ -6,14 +6,19 @@ from typing import Any
 
 @dataclass
 class RiskDecisionResult:
-    """Result of risk evaluation."""
+    """Result of risk evaluation.
+
+    Rejections carry only ``approved``, ``reason`` and ``risk_score``; the
+    sizing fields are populated on approval, so they default to None.
+    """
 
     approved: bool
     reason: str
-    position_size: float
-    stop_loss: float
-    risk_reward: float
-    metadata: dict[str, Any]
+    risk_score: float
+    adjusted_size_pct: float | None = None
+    stop_loss: float | None = None
+    target_price: float | None = None
+    max_loss_usd: float | None = None
 
 
 class RiskEngine:

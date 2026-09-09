@@ -1,6 +1,6 @@
-"""Memory Engine interfaces - stub for forward references."""
+"""Memory Engine interfaces."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -8,13 +8,20 @@ from typing import Any
 class HistoricalTrade:
     """Historical trade record for similarity search."""
 
+    id: str
     ticker: str
-    date: str
-    pattern: str
-    entry: float
-    exit: float
-    outcome: str
-    metadata: dict[str, Any]
+    entry_price: float
+    exit_price: float
+    side: str
+    pnl_pct: float
+    result: str
+    entry_time: str
+    exit_time: str
+    indicators: dict[str, Any] = field(default_factory=dict)
+    pattern: str | None = None
+    setup_quality: float | None = None
+    hold_time_minutes: float | None = None
+    chart_embedding: list[float] | None = None
 
 
 class MemoryEngine:
