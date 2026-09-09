@@ -12,7 +12,9 @@ try:
 
     TORCH_AVAILABLE = True
 except ImportError:
-    torch = None
+    # mypy has no way to type "module or None"; this is the standard optional
+    # dependency pattern and the guard is TORCH_AVAILABLE.
+    torch = None  # type: ignore[assignment]
     TORCH_AVAILABLE = False
 
 from tradingos.core.config import ModelManagerConfig, get_config
@@ -49,7 +51,7 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def load(self, device: "torch.device", **kwargs: Any) -> None:
+    def load(self, device: Optional["torch.device"], **kwargs: Any) -> None:
         """Load model into VRAM. Called once at startup."""
         pass
 
