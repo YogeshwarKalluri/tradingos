@@ -11,6 +11,7 @@ from tradingos.modules.market.duckdb_store import DuckDBStore
 from tradingos.modules.market.gap_detector import GapDetector
 from tradingos.modules.market.interfaces import OHLCV, MarketData
 from tradingos.modules.market.polygon_ws import PolygonWebSocket
+from tradingos.modules.scanner.interfaces import StockCandidate
 
 logger = get_logger(__name__)
 
@@ -105,7 +106,7 @@ class MarketDataModule:
                     ):
                         pass
 
-    async def enrich_candidate(self, candidate) -> None:
+    async def enrich_candidate(self, candidate: StockCandidate) -> None:
         """Enrich a stock candidate with market data."""
         ticker = candidate.ticker
 

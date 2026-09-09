@@ -1,6 +1,8 @@
 """TradingOS Health & Metrics Endpoints."""
 
+from collections.abc import AsyncIterator
 from datetime import UTC, datetime
+from typing import Any
 
 import structlog
 from fastapi import FastAPI, Response
@@ -32,7 +34,7 @@ class HealthServer:
         self.app = FastAPI(title="TradingOS Health", lifespan=self._lifespan)
         self._setup_routes()
 
-    async def _lifespan(self, app: FastAPI):
+    async def _lifespan(self, app: FastAPI) -> AsyncIterator[None]:
         """Application lifespan manager."""
         logger.info("health_server_starting")
         yield
@@ -42,7 +44,7 @@ class HealthServer:
         """Setup HTTP routes."""
 
         @self.app.get(self.config.path)
-        async def health_check():
+        async def health_check() -> dict[str, Any]:
             """Health check endpoint."""
             model_manager = get_model_manager()
             event_bus = get_event_bus()
@@ -77,7 +79,7 @@ class HealthServer:
             }
 
         @self.app.get(self.config.metrics_path)
-        async def metrics():
+        async def metrics() -> Response:
             """Prometheus metrics endpoint."""
             # Update dynamic metrics
             model_manager = get_model_manager()
@@ -89,13 +91,13 @@ class HealthServer:
             return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
         @self.app.get("/models")
-        async def models_status():
+        async def models_status() -> dict[str, Any]:
             """Model status endpoint."""
             model_manager = get_model_manager()
             return model_manager.get_stats()
 
         @self.app.get("/events")
-        async def events_status():
+        async def events_status() -> dict[str, Any]:
             """Event bus status endpoint."""
             event_bus = get_event_bus()
             return event_bus.get_stats()
@@ -107,7 +109,7 @@ def create_health_app(config: HealthConfig | None = None) -> FastAPI:
     return server.app
 
 
-async def run_health_server(config: HealthConfig | None = None):
+async def run_health_server(config: HealthConfig | None = None) -> None:
     """Run health server standalone."""
     import uvicorn
 

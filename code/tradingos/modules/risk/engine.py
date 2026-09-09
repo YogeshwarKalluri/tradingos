@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from tradingos.core.events import FillReceived
 from tradingos.core.logging import get_logger
 from tradingos.modules.reasoning.interfaces import TradeThesis
 from tradingos.modules.risk.interfaces import RiskDecisionResult, RiskEngine
@@ -184,7 +185,7 @@ class RiskEngineImpl(RiskEngine):
 
         return size
 
-    async def on_fill(self, fill_event) -> None:
+    async def on_fill(self, fill_event: FillReceived) -> None:
         """Update state on order fill."""
         ticker = fill_event.ticker
         qty = fill_event.qty

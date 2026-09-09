@@ -181,7 +181,7 @@ class ONNXVisionEngine(VisionEngine):
 class MockVisionEngine(VisionEngine):
     """Mock vision engine for development/testing."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         self.patterns = ["bull_flag", "vwap_reclaim", "opening_range_breakout"]
         logger.info("mock_vision_engine_initialized")
 
@@ -200,7 +200,7 @@ class MockVisionEngine(VisionEngine):
         )
 
 
-def create_vision_engine(use_mock: bool = True, **kwargs) -> VisionEngine:
+def create_vision_engine(use_mock: bool = True, **kwargs: Any) -> VisionEngine:
     """Factory function to create vision engine."""
     if use_mock:
         return MockVisionEngine(**kwargs)

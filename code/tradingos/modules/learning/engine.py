@@ -167,7 +167,7 @@ class MLLearningEngine(LearningEngine):
 
         return result
 
-    async def evaluate(self, model_path: str, test_data) -> dict[str, float]:
+    async def evaluate(self, model_path: str, test_data: Any) -> dict[str, float]:
         """Evaluate a trained model on test data."""
         model = joblib.load(model_path)
         X_test, y_test = test_data

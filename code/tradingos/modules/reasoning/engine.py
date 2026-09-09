@@ -7,6 +7,7 @@ from tradingos.core.logging import get_logger
 from tradingos.modules.indicators.interfaces import IndicatorSnapshot
 from tradingos.modules.memory.interfaces import HistoricalTrade
 from tradingos.modules.reasoning.interfaces import ReasoningEngine, TradeThesis
+from tradingos.modules.scanner.interfaces import StockCandidate
 from tradingos.modules.vision.interfaces import VisionOutput
 
 logger = get_logger(__name__)
@@ -35,7 +36,7 @@ class CompositeReasoningEngine(ReasoningEngine):
 
     async def analyze(
         self,
-        candidate,
+        candidate: StockCandidate,
         indicators: IndicatorSnapshot | None,
         vision: VisionOutput | None,
         similar_trades: list[HistoricalTrade] | None,

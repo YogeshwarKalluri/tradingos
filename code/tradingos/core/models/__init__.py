@@ -49,7 +49,7 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def load(self, device: "torch.device", **kwargs) -> None:
+    def load(self, device: "torch.device", **kwargs: Any) -> None:
         """Load model into VRAM. Called once at startup."""
         pass
 

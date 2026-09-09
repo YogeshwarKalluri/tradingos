@@ -233,7 +233,7 @@ class QdrantMemoryEngine(MemoryEngine):
 class MockMemoryEngine(MemoryEngine):
     """Mock memory engine for development/testing."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         self.trades: list[HistoricalTrade] = []
         logger.info("mock_memory_engine_initialized")
 
@@ -266,7 +266,7 @@ class MockMemoryEngine(MemoryEngine):
         pass
 
 
-def create_memory_engine(use_mock: bool = True, **kwargs) -> MemoryEngine:
+def create_memory_engine(use_mock: bool = True, **kwargs: Any) -> MemoryEngine:
     """Factory function to create memory engine."""
     if use_mock:
         return MockMemoryEngine(**kwargs)

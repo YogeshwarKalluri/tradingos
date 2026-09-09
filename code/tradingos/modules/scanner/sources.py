@@ -116,7 +116,7 @@ class WebhookSource(ScannerSource):
         self._runner = runner
         logger.info("webhook_started", host=self.host, port=self.port, path=self.path)
 
-    async def _handle_post(self, request) -> web.Response:
+    async def _handle_post(self, request: web.Request) -> web.Response:
         """Handle incoming webhook POST."""
         try:
             data = await request.json()

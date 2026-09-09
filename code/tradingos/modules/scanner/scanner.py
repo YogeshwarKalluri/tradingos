@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from tradingos.core.events import StockDetected, publish_event
 from tradingos.core.logging import get_logger
-from tradingos.modules.scanner.interfaces import ScannerSource
+from tradingos.modules.scanner.interfaces import ScannerSource, StockCandidate
 
 logger = get_logger(__name__)
 
@@ -54,7 +54,7 @@ class Scanner:
             if await self._should_process(candidate):
                 await self._emit_candidate(candidate)
 
-    async def _should_process(self, candidate) -> bool:
+    async def _should_process(self, candidate: StockCandidate) -> bool:
         """Check if candidate should be processed (deduplication)."""
         key = f"{candidate.ticker}:{candidate.timestamp.isoformat()}"
         now = datetime.now()
@@ -75,7 +75,7 @@ class Scanner:
 
         return True
 
-    async def _emit_candidate(self, candidate) -> None:
+    async def _emit_candidate(self, candidate: StockCandidate) -> None:
         """Emit StockDetected event."""
         event = StockDetected(candidate=candidate, source="scanner")
         await publish_event(event)

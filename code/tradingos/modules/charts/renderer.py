@@ -1,5 +1,7 @@
 """Chart Engine - GPU-accelerated chart rendering using Numba/CUDA."""
 
+from typing import Any
+
 import numpy as np
 from numba import cuda
 
@@ -33,8 +35,17 @@ class GPUChartRenderer(ChartRenderer):
     @staticmethod
     @cuda.jit
     def _render_ohlcv_kernel(
-        opens, highs, lows, closes, volumes, output, height, width, candle_width, gap
-    ):
+        opens: Any,
+        highs: Any,
+        lows: Any,
+        closes: Any,
+        volumes: Any,
+        output: Any,
+        height: Any,
+        width: Any,
+        candle_width: Any,
+        gap: Any,
+    ) -> None:
         """CUDA kernel to render OHLCV candles."""
         tx = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
         ty = cuda.threadIdx.y + cuda.blockIdx.y * cuda.blockDim.y

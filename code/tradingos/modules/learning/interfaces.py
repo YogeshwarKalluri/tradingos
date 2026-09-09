@@ -53,7 +53,7 @@ class LearningEngine:
     async def train(self, config: TrainingConfig) -> TrainingResult:
         raise NotImplementedError
 
-    async def evaluate(self, model_path: str, test_data) -> dict[str, float]:
+    async def evaluate(self, model_path: str, test_data: Any) -> dict[str, float]:
         raise NotImplementedError
 
     async def get_training_history(self) -> list[TrainingResult]:
