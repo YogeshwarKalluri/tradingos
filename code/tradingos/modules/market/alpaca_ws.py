@@ -111,7 +111,7 @@ class AlpacaWebSocket(DataSource):
                     "ticker": msg.get("S"),
                     "price": msg.get("p"),
                     "size": msg.get("s"),
-                    "timestamp": datetime.fromisoformat(msg.get("t").replace("Z", "+00:00")),
+                    "timestamp": datetime.fromisoformat(msg.get("t", "").replace("Z", "+00:00")),
                 }
                 # Note: Alpaca doesn't send minute bars directly via WS
                 if self.on_trade:
@@ -123,7 +123,7 @@ class AlpacaWebSocket(DataSource):
                     "bid_size": msg.get("bs"),
                     "ask_price": msg.get("ap"),
                     "ask_size": msg.get("as"),
-                    "timestamp": datetime.fromisoformat(msg.get("t").replace("Z", "+00:00")),
+                    "timestamp": datetime.fromisoformat(msg.get("t", "").replace("Z", "+00:00")),
                 }
                 if self.on_quote:
                     await self.on_quote(quote)

@@ -12,7 +12,7 @@ class VideoSource:
     channel_id: str | None = None
     video_id: str | None = None
     local_path: str | None = None
-    keywords: list[str] = None
+    keywords: list[str] | None = None
 
     def __post_init__(self) -> None:
         if self.keywords is None:

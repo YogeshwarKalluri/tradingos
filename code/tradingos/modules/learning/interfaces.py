@@ -27,7 +27,7 @@ class TrainingConfig:
     train_start: str | None = None
     train_end: str | None = None
     validation_split: float = 0.2
-    hyperparams: dict[str, Any] = None
+    hyperparams: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.hyperparams is None:

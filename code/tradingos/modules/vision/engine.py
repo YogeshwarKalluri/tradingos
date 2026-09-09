@@ -52,7 +52,7 @@ class ONNXVisionEngine(VisionEngine):
         self.confidence_threshold = confidence_threshold
         self.nms_iou_threshold = nms_iou_threshold
         self.use_tensorrt = use_tensorrt
-        self.session = None
+        self.session: Any = None
         self._load_model()
 
     def _load_model(self) -> None:

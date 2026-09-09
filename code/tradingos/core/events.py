@@ -49,7 +49,7 @@ class Event:
 class StockDetected(Event):
     """Scanner detected a new candidate."""
 
-    candidate: StockCandidate = None  # Forward reference - defined in scanner module
+    candidate: StockCandidate | None = None  # Forward reference - defined in scanner module
     source: str = "scanner"
 
 

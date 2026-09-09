@@ -40,6 +40,12 @@ class QdrantMemoryEngine(MemoryEngine):
         self.client: AsyncQdrantClient | None = None
         self._initialized = False
 
+    def _require_client(self) -> AsyncQdrantClient:
+        """Return the client, or fail clearly if initialize() was not called."""
+        if self.client is None:
+            raise RuntimeError("initialize() must be called before using the memory engine")
+        return self.client
+
     async def initialize(self) -> None:
         """Initialize Qdrant client and collection."""
         if self._initialized:
@@ -98,7 +104,7 @@ class QdrantMemoryEngine(MemoryEngine):
             },
         )
 
-        await self.client.upsert(
+        await self._require_client().upsert(
             collection_name=self.collection_name,
             points=[point],
         )
@@ -125,7 +131,7 @@ class QdrantMemoryEngine(MemoryEngine):
                 filter_obj = Filter(must=conditions)
 
         # Search
-        results = await self.client.search(
+        results = await self._require_client().search(
             collection_name=self.collection_name,
             query_vector=query_embedding.tolist(),
             limit=limit,
@@ -162,7 +168,7 @@ class QdrantMemoryEngine(MemoryEngine):
         """Get memory engine statistics."""
         await self.initialize()
 
-        info = await self.client.get_collection(self.collection_name)
+        info = await self._require_client().get_collection(self.collection_name)
 
         return {
             "collection": self.collection_name,

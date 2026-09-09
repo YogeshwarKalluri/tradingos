@@ -2,7 +2,7 @@ import asyncio
 import contextlib
 import json
 import os
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 
 from aiohttp import web
@@ -21,7 +21,7 @@ class FileWatchSource(ScannerSource):
         self,
         path: str,
         pattern: str = "*.jsonl",
-        callback: Callable[[list[StockCandidate]], None] | None = None,
+        callback: Callable[[list[StockCandidate]], Awaitable[None]] | None = None,
     ):
         self.path = Path(path)
         self.pattern = pattern
@@ -94,7 +94,7 @@ class WebhookSource(ScannerSource):
         host: str = "0.0.0.0",
         port: int = 8081,
         path: str = "/scanner/candidates",
-        callback: Callable[[list[StockCandidate]], None] | None = None,
+        callback: Callable[[list[StockCandidate]], Awaitable[None]] | None = None,
     ):
         self.host = host
         self.port = port
@@ -150,7 +150,7 @@ class IPCSource(ScannerSource):
     def __init__(
         self,
         pipe_path: str,
-        callback: Callable[[list[StockCandidate]], None] | None = None,
+        callback: Callable[[list[StockCandidate]], Awaitable[None]] | None = None,
     ):
         self.pipe_path = pipe_path
         self.callback = callback
